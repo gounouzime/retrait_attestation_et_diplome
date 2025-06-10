@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Liste des étudiants{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Liste des étudiants inscrits</h2>
+
+<a href="{{ url_for('routes.admin_dashboard') }}" class="btn btn-secondary mb-3">Retour</a>
+
+<div class="mb-3">
+    <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par matricule, filière ou année">
+</div>
+
+<table class="table table-bordered table-hover" id="etudiantsTable">
+    <thead class="table-dark">
+        <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Matricule</th>
+            <th>Numéro</th>
+            <th>Email</th>
+            <th>Filière</th>
+            <th>Année</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for etudiant in etudiants %}
+        <tr>
+            <td>{{ etudiant.nom }}</td>
+            <td>{{ etudiant.prenom }}</td>
+            <td>{{ etudiant.matricule }}</td>
+            <td>{{ etudiant.numero }}</td>
+            <td>{{ etudiant.email }}</td>
+            <td>{{ etudiant.filiere }}</td>
+            <td>{{ etudiant.annee }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('routes.supprimer_etudiant', etudiant_id=etudiant.id) }}">
+                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                   <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#etudiantsTable tbody tr');
+        rows.forEach(row => {
+            let text = row.textContent.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+</script>
+{% endblock %}

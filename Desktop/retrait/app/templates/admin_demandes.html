@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Liste des demandes</h2>
+
+<table class="table-demandes">
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>Prénom</th>
+      <th>Matricule</th>
+      <th>Filière</th>
+      <th>Année</th>
+      <th>Email</th>
+      <th>Type de demande</th>
+      <th>Fichiers</th>
+      <th>Statut</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for demande in demandes %}
+    <tr>
+      <td>{{ demande.utilisateur.nom }}</td>
+      <td>{{ demande.utilisateur.prenom }}</td>
+      <td>{{ demande.utilisateur.matricule }}</td>
+      <td>{{ demande.utilisateur.filiere }}</td>
+      <td>{{ demande.utilisateur.annee }}</td>
+      <td>{{ demande.utilisateur.email }}</td>
+      <td>{{ demande.type_demande }}</td>
+      <td>
+        {% if demande.fichier_acte_naissance %}
+          <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_acte_naissance) }}" target="_blank">Acte</a><br>
+        {% endif %}
+        {% if demande.fichier_carte_etudiant %}
+          <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_carte_etudiant) }}" target="_blank">Carte</a><br>
+        {% endif %}
+        {% if demande.fichier_releve_notes %}
+          <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_releve_notes) }}" target="_blank">Relevé</a><br>
+        {% endif %}
+        {% if demande.fichier_demande_au_doyen %}
+          <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_demande_au_doyen) }}" target="_blank">Lettre Doyen</a><br>
+        {% endif %}
+        {% if demande.fichier_recu %}
+          <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_recu) }}" target="_blank">Reçu</a><br>
+        {% endif %}
+        {% if demande.fichier_piece %}
+          <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_piece) }}" target="_blank">Pièce</a><br>
+        {% endif %}
+      </td>
+      <td>
+        {% if demande.statut == 'Validée' %}
+          <span class="badge-validee">Validée</span>
+        {% elif demande.statut == 'Refusée' %}
+          <span class="badge-refusee">Refusée</span>
+        {% else %}
+          <span class="badge-en-attente">En attente</span>
+        {% endif %}
+      </td>
+      <td>
+      <form method="POST" action="{{ url_for('routes.traiter_demande', demande_id=demande.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <button type="submit" name="decision" value="valider" class="btn-valider">Valider</button>
+
+        <select name="raison_refus" id="raison_{{ demande.id }}" class="select-raison">
+          <option value="">Raison du refus</option>
+          <option value="Dossier incomplet">Dossier incomplet</option>
+          <option value="Documents illisibles">Documents illisibles</option>
+          <option value="Paiement non justifié">Paiement non justifié</option>
+          <option value="Demande non conforme">Demande non conforme</option>
+          <option value="autre">Autre</option>
+        </select>
+
+        <input type="text" name="raison_personnalisee" id="raison_perso_{{ demande.id }}"
+              placeholder="Raison personnalisée"
+              style="display:none; margin-top:5px; border-radius:5px; padding:4px; border:1px solid #ccc; width: 90%;">
+
+        <button type="submit" name="decision" value="refuser" class="btn-refuser" style="margin-top:5px;">Refuser</button>
+      </form>
+
+      {% if demande.statut == 'Validée' %}
+        <form method="POST" action="{{ url_for('routes.upload_document', demande_id=demande.id) }}" enctype="multipart/form-data" style="margin-top: 10px;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="file" name="document_admin" required style="margin-bottom: 5px;">
+          
+          <select name="type" required style="margin-bottom: 5px; padding: 4px; border-radius: 5px; border: 1px solid #ccc;">
+            <option value="">-- Type de document --</option>
+            <option value="Diplôme de Licence">Diplôme de Licence</option>
+            <option value="Attestation de Diplôme">Attestation de Diplôme</option>
+            <option value="Attestation de passage en L3">Attestation de passage en L3</option>
+            <option value="Duplicata attestation de diplôme">Duplicata attestation de diplôme</option>
+          </select>
+
+          <button type="submit" class="btn-upload">Uploader</button>
+        </form>
+      {% endif %}
+
+      </td>
+    </tr>
+
+    {% if demande.statut == 'Validée' and demande.documents_admin %}
+    <tr class="ligne-documents-admin">
+      <td colspan="10" style="background-color: #f8f8f8; padding: 10px;">
+        <strong>Documents administratifs ajoutés :</strong><br>
+       {% for doc in demande.documents_admin %}
+          • <strong>{{ doc.type }}</strong> : 
+          <a href="{{ url_for('routes.uploaded_file', filename=doc.filename) }}" target="_blank">Voir</a>
+          {% if doc.date_upload %}
+            (ajouté le {{ doc.date_upload.strftime('%d/%m/%Y à %Hh%M') }})
+          {% else %}
+            (date non renseignée)
+          {% endif %} 
+          <br>
+       {% endfor %}
+
+      </td>
+    </tr>
+    {% endif %}
+
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.select-raison').forEach(select => {
+      select.addEventListener('change', function () {
+        const id = this.id.split('_')[1];
+        const champPerso = document.getElementById('raison_perso_' + id);
+        if (this.value === 'autre') {
+          champPerso.style.display = 'inline-block';
+          champPerso.required = true;
+        } else {
+          champPerso.style.display = 'none';
+          champPerso.required = false;
+          champPerso.value = '';
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

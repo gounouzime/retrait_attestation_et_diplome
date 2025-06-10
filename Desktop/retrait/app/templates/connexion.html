@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Connexion{% endblock %}
+{% block content %}
+<h2>Connexion</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    
+    {{ form.email.label }} 
+    {{ form.email(class="form-control") }}<br>
+    
+    {{ form.password.label }}
+    <div style="position: relative;">
+        {{ form.password(class="form-control", id="password") }}
+        <span onclick="togglePassword()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+            👁️
+        </span>
+    </div>
+    <br>
+    
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+<p>Pas encore inscrit ? <a href="{{ url_for('routes.confirmation') }}">Créer un compte</a></p>
+
+<script>
+    function togglePassword() {
+        const passwordField = document.getElementById("password");
+        const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
+        passwordField.setAttribute("type", type);
+    }
+</script>
+{% endblock %}

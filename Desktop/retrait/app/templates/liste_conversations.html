@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Liste des conversations</h2>
+    {% if conversations %}
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Matricule</th>
+                <th>Dernier message</th>
+                <th>Messages non lus</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for conv in conversations %}
+            <tr>
+                <td>{{ conv.prenom }} {{ conv.nom }}</td>
+                <td>{{ conv.matricule }}</td>
+                <td>
+                    {{ conv.date_envoi.strftime('%d/%m/%Y %H:%M') }}<br>
+                    {{ conv.contenu|truncate(50, True, '...') }}
+                </td>
+                <td>
+                    {% if conv.non_lus and conv.non_lus > 0 %}
+                    <span class="badge bg-danger">{{ conv.non_lus }}</span>
+                    {% else %} 0 {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('routes.admin_messagerie', email_etudiant=conv.email) }}" class="btn btn-primary btn-sm">Voir</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Aucune conversation.</p>
+    {% endif %}
+</div>
+{% endblock %}

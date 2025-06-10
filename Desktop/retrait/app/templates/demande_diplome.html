@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Faire une Demande{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Demande de retrait de diplôme ou attestation</h2>
+
+    <p class="alert alert-info">
+        Veuillez soumettre vos fichiers au format <strong>PDF uniquement</strong>. 
+        Taille maximale autorisée : <strong>16 Mo</strong> par fichier.
+    </p>
+    <p class="text-muted mt-3">
+        Vérifiez bien toutes vos informations avant de soumettre. Vous ne pourrez pas modifier la demande après envoi.
+    </p>
+
+
+    <form method="POST" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="form-group mb-3">
+            {{ form.type_demande.label(class="form-label") }}
+            {{ form.type_demande(class="form-control") }}
+            {% if form.type_demande.errors %}
+                <div class="text-danger">{{ form.type_demande.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group mb-3">
+            {{ form.annee_scolaire.label(class="form-label") }}
+            {{ form.annee_scolaire(class="form-control") }}
+            {% if form.annee_scolaire.errors %}
+                <div class="text-danger">{{ form.annee_scolaire.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group mb-3">
+            {{ form.numero_quittance.label(class="form-label") }}
+            {{ form.numero_quittance(class="form-control") }}
+            {% if form.numero_quittance.errors %}
+                <div class="text-danger">{{ form.numero_quittance.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <hr>
+        <h5 class="mb-3">Pièces à fournir (PDF uniquement)</h5>
+
+        {% for champ in [form.fichier_acte_naissance, form.fichier_carte_etudiant, form.fichier_releve_notes, form.fichier_demande_au_doyen] %}
+        <div class="form-group mb-3">
+            {{ champ.label(class="form-label") }}
+            {{ champ(class="form-control-file", accept=".pdf") }}
+            {% if champ.errors %}
+                <div class="text-danger">{{ champ.errors[0] }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+
+        <hr>
+        <h5 class="mb-3">Pièces complémentaires</h5>
+
+        {% for champ in [form.recu, form.piece] %}
+        <div class="form-group mb-3">
+            {{ champ.label(class="form-label") }}
+            {{ champ(class="form-control-file") }}
+            {% if champ.errors %}
+                <div class="text-danger">{{ champ.errors[0] }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="form-group mt-4">
+            {{ form.submit(class="btn btn-success") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

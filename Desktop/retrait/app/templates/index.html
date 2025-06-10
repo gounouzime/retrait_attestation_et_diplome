@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Accueil - Retrait Diplômes{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column justify-content-center align-items-center" style="height: 70vh; text-align: center;">
+
+    <!-- Logo et nom de l'université -->
+    <div class="mb-4 text-center">
+        <img src="{{ url_for('static', filename='img/images.jfif') }}" alt="Logo Université" style="max-height: 200px;">
+        <h2 class="mt-2">Université de Natitingou</h2>
+    </div>
+
+    <!-- Description -->
+    <h1 class="mb-4">Bienvenue sur la plateforme de retrait d'attestation et diplôme</h1>
+    <p class="mb-5">
+        Ce site vous permet de simplifier vos démarches administratives en déposant vos demandes en ligne, 
+        de suivre leur traitement, et de récupérer facilement vos documents officiels.
+    </p>
+
+    <!-- Boutons -->
+    <div>
+        <a href="{{ url_for('routes.confirmation') }}" class="btn btn-primary btn-lg mx-2">Inscription</a>
+        <a href="{{ url_for('routes.connexion') }}" class="btn btn-secondary btn-lg mx-2">Connexion</a>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Messagerie Étudiant</h2>
+
+<style>
+  .message-box {
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+  }
+
+  .message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .badge {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+  }
+
+  .badge.repondu {
+    background-color: #28a745;
+  }
+
+  .badge.non-repondu {
+    background-color: #dc3545;
+  }
+
+  textarea {
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    margin-top: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 20px 0;
+  }
+</style>
+
+{% for msg in messages %}
+  <div class="message-box">
+    <div class="message-header">
+      <p><strong>De :</strong> {{ msg.nom }} ({{ msg.email }})</p>
+      {% if msg.reponse %}
+        <span class="badge repondu">Répondu</span>
+      {% else %}
+        <span class="badge non-repondu">Non répondu</span>
+      {% endif %}
+    </div>
+
+    <p><strong>Sujet :</strong> {{ msg.sujet }}</p>
+    <p><strong>Message :</strong><br>{{ msg.contenu }}</p>
+    <p><strong>Date :</strong> {{ msg.date_envoi.strftime('%d/%m/%Y %H:%M') }}</p>
+
+    {% if not msg.reponse %}
+      <form method="POST" action="{{ url_for('routes.repondre_message', message_id=msg.id) }}">
+        {{ csrf_token() }}
+        <textarea name="contenu" placeholder="Votre réponse ici" required rows="4"></textarea>
+        <button type="submit">Répondre</button>
+      </form>
+    {% else %}
+      <p><strong>Réponse :</strong> {{ msg.reponse }}</p>
+      <p><strong>Envoyée le :</strong> {{ msg.date_reponse.strftime('%d/%m/%Y %H:%M') }}</p>
+    {% endif %}
+  </div>
+  <hr>
+{% endfor %}
+
+{% endblock %}

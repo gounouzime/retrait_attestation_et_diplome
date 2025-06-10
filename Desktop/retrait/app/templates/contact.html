@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="contact-container">
+    <h2>Contacter l'administration</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('routes.contact_admin') }}">
+      {{ form.hidden_tag() }}
+
+      <label for="nom">Nom :</label>
+      {{ form.nom(size=32) }}
+
+      <label for="email">Email :</label>
+      {{ form.email(size=32) }}
+
+      <label for="sujet">Sujet :</label>
+      {{ form.sujet(size=64) }}
+
+      <label for="message">Message :</label>
+      {{ form.message(rows=5) }}
+
+      {{ form.submit() }}
+    </form>
+  </div>
+{% endblock %}

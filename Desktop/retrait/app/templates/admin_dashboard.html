@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Espace Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-body text-center">
+            <h2 class="card-title mb-4">Bienvenue, {{ user.prenom }} {{ user.nom }}</h2>
+
+            <div class="d-grid gap-3 col-6 mx-auto">
+                <a href="{{ url_for('routes.admin_demandes') }}" class="btn btn-primary btn-lg">
+                    📄 Gérer les demandes
+                </a>
+
+                <a href="{{ url_for('routes.admin_messagerie') }}" class="btn btn-secondary btn-lg position-relative">
+                    💬 Messagerie
+                    {% if nb_non_lus > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ nb_non_lus }}
+                        <span class="visually-hidden">messages non lus</span>
+                    </span>
+                    {% endif %}
+                </a>
+
+                <a href="{{ url_for('routes.liste_etudiants') }}" class="btn btn-warning btn-lg">
+                    👥 Liste des étudiants
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

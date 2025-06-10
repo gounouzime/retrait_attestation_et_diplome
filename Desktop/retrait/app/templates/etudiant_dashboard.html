@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title %}Espace Étudiant{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="container mt-4">
+    <h2>Bienvenue {{ user.prenom }} {{ user.nom }}</h2>
+
+    <!-- Faire une nouvelle demande -->
+    <div class="mb-4">
+        <a href="{{ url_for('routes.faire_demande') }}" class="btn btn-primary">Faire une demande</a>
+    </div>
+
+    <!-- Liste des demandes envoyées -->
+    <h4>Mes demandes :</h4>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Type</th>
+                    <th>Fichiers fournis</th>
+                    <th>Statut</th>
+                    <th>Raison (si refusée)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for demande in demandes %}
+                <tr>
+                    <td>{{ demande.type_demande }}</td>
+                    <td>
+                        {% if demande.fichier_acte_naissance %}
+                            <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_acte_naissance) }}" target="_blank">Acte de naissance</a><br>
+                        {% endif %}
+                        {% if demande.fichier_carte_etudiant %}
+                            <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_carte_etudiant) }}" target="_blank">Carte étudiant</a><br>
+                        {% endif %}
+                        {% if demande.fichier_releve_notes %}
+                            <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_releve_notes) }}" target="_blank">Relevé de notes</a><br>
+                        {% endif %}
+                        {% if demande.fichier_demande_au_doyen %}
+                            <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_demande_au_doyen) }}" target="_blank">Demande au Doyen</a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge text-white
+                            {% if demande.statut == 'Validée' %} bg-success
+                            {% elif demande.statut == 'Refusée' %} bg-danger
+                            {% else %} bg-secondary {% endif %}">
+                            {{ demande.statut or "En attente" }}
+                        </span>
+                    </td>
+                    <td>{{ demande.raison_refus or "-" }}</td>
+                    <td>
+                        {% if demande.statut == 'Refusée' %}
+                            <a href="{{ url_for('routes.faire_demande', demande_id=demande.id) }}" class="btn btn-warning btn-sm">Modifier</a>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">Aucune demande soumise pour l’instant.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Debug affichage documents -->
+    <h4>Debug documents ({{ documents|length }}) :</h4>
+    <ul>
+        {% for doc in documents %}
+            <li>
+                Filename: {{ doc.filename }}<br>
+                Demande ID: {{ doc.demande_id }}<br>
+                Type demande: {{ doc.demande.type_demande if doc.demande else 'Pas de demande liée' }}<br>
+                Année scolaire: {{ doc.demande.annee_scolaire if doc.demande else '-' }}<br>
+                Filière: {{ doc.demande.utilisateur.filiere if doc.demande else '-' }}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Liste des documents disponibles -->
+    <h4 class="mt-5">Documents disponibles :</h4>
+    <ul class="list-group">
+        {% set has_document = false %}
+        {% for doc in documents %}
+            {% if doc.filename %}
+                {% set has_document = true %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{{ url_for('routes.telecharger_fichier', filename=doc.filename) }}" target="_blank">
+                        {{ doc.demande.type_demande }} - {{ doc.demande.annee_scolaire }} - {{ doc.demande.utilisateur.filiere }}
+                    </a>
+                    <a href="{{ url_for('routes.contact_admin') }}" class="btn btn-outline-info btn-sm">Messagerie</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        {% if not has_document %}
+            <li class="list-group-item">Aucun document disponible</li>
+        {% endif %}
+    </ul>
+
+</div>
+{% endblock %}

@@ -1,0 +1,286 @@
+/* Couleurs principales */
+:root {
+    --bleu-principal: #3498db;
+    --violet-principal: #8e44ad;
+    --blanc: #ffffff;
+    --gris-clair: #f5f5f5;
+    --texte: #333333;
+}
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--gris-clair);
+    color: var(--texte);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+}
+
+/* Titres et texte */
+h1, h2, h3, h4, h5, h6, p, label, span, a, td, th {
+    color: #000 !important;
+}
+
+/* Navigation */
+.navbar {
+    background: linear-gradient(90deg, var(--bleu-principal), var(--violet-principal));
+    padding: 1rem;
+}
+
+.navbar a {
+    color: var(--blanc);
+    margin-right: 1rem;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
+}
+
+/* Container principal */
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--blanc);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    color: #000;
+}
+
+/* Formulaires */
+form {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+form label {
+    font-weight: bold;
+}
+
+form input, form select, form textarea {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Boutons */
+.btn {
+    background: var(--bleu-principal);
+    color: var(--blanc);
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.btn:hover {
+    background: var(--violet-principal);
+}
+
+/* Tableaux */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+table th, table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    text-align: left;
+    color: #000;
+}
+
+table th {
+    background: var(--violet-principal);
+    color: var(--blanc);
+}
+
+table tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+/* Badges */
+.badge {
+    padding: 0.4em 0.8em;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    display: inline-block;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.bg-secondary {
+    background-color: #6c757d !important;
+    color: white !important;
+}
+
+/* Sidebar */
+#sidebar {
+    width: 220px;
+    background: #0d6efd;
+    color: white;
+    min-height: 100vh;
+    padding-top: 1rem;
+    position: fixed;
+}
+
+#sidebar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px 20px;
+    font-weight: 500;
+}
+
+#sidebar a:hover {
+    background: #084298;
+    text-decoration: none;
+}
+
+/* Content area */
+#content {
+    margin-left: 220px;
+    padding: 20px;
+    width: 100%;
+    color: #000;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #sidebar {
+        position: relative;
+        width: 100%;
+        min-height: auto;
+        padding: 0;
+    }
+    #content {
+        margin-left: 0;
+    }
+}
+
+/* Contact */
+.contact-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    background: white;
+    color: #000;
+}
+
+.contact-container input,
+.contact-container textarea {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px;
+}
+
+/* Alertes */
+.alert-success {
+    background-color: #d4edda;
+    padding: 10px;
+    margin-bottom: 10px;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    padding: 10px;
+    margin-bottom: 10px;
+    color: #721c24;
+}
+
+/* Badges personnalisés */
+.badge-validee {
+    background-color: #28a745;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.badge-refusee {
+    background-color: #dc3545;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.badge-en-attente {
+    background-color: #6c757d;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+/* Boutons validation/refus */
+.btn-valider {
+    background-color: #32ea69;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-refuser {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-top: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-valider:hover, .btn-refuser:hover {
+    opacity: 0.85;
+}
+
+/* Table demandes */
+.table-demandes {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table-demandes th,
+.table-demandes td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    color: #000;
+}
+
+.table-demandes th {
+    background-color: #f5f5f5;
+}

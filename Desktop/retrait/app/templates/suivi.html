@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Suivi des Demandes</h2>
+{% for demande in demandes %}
+    <div class="demande">
+        <p><strong>{{ demande.type_document|capitalize }}</strong> demandé le {{ demande.date_demande.strftime("%d/%m/%Y") }}</p>
+        <p>Statut : {{ demande.statut }}</p>
+        {% if demande.statut == 'Validée' %}
+            {% for doc in documents %}
+                {% if doc.demande_id == demande.id %}
+                    <p>Document disponible : <a href="{{ url_for('uploaded_file', filename=doc.nom_fichier) }}" target="_blank">{{ doc.nom_fichier }}</a></p>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+{% else %}
+    <p>Aucune demande soumise.</p>
+{% endfor %}
+{% endblock %}
