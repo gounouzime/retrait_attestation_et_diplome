@@ -3,26 +3,24 @@
 {% block title %}Accueil - Retrait Diplômes{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column justify-content-center align-items-center" style="height: 70vh; text-align: center;">
-
-    <!-- Logo et nom de l'université -->
-    <div class="mb-4 text-center">
-        <img src="{{ url_for('static', filename='img/images.jfif') }}" alt="Logo Université" style="max-height: 200px;">
-        <h2 class="mt-2">Université de Natitingou</h2>
+<div class="hero-section position-relative">
+    <!-- Boutons positionnés à gauche et à droite -->
+    <div class="hero-buttons d-flex justify-content-between px-5 pt-4">
+        <a href="{{ url_for('routes.confirmation') }}" class="btn btn-orange">
+            <i class="bi bi-person-plus-fill me-1"></i> Inscription
+        </a>
+        <a href="{{ url_for('routes.connexion') }}" class="btn btn-outline-orange">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Connexion
+        </a>
     </div>
 
-    <!-- Description -->
-    <h1 class="mb-4">Bienvenue sur la plateforme de retrait d'attestation et diplôme</h1>
-    <p class="mb-5">
-        Ce site vous permet de simplifier vos démarches administratives en déposant vos demandes en ligne, 
-        de suivre leur traitement, et de récupérer facilement vos documents officiels.
-    </p>
-
-    <!-- Boutons -->
-    <div>
-        <a href="{{ url_for('routes.confirmation') }}" class="btn btn-primary btn-lg mx-2">Inscription</a>
-        <a href="{{ url_for('routes.connexion') }}" class="btn btn-secondary btn-lg mx-2">Connexion</a>
+    <!-- Texte centré avec animation -->
+    <div class="hero-text animated-fade-in text-center px-3">
+        <h2 class="mb-3">Bienvenue sur la plateforme de retrait d'attestation et diplôme</h2>
+        <p>
+            Ce site vous permet de simplifier vos démarches administratives en déposant vos demandes en ligne,
+            de suivre leur traitement, et de récupérer facilement vos documents officiels.
+        </p>
     </div>
-
 </div>
 {% endblock %}

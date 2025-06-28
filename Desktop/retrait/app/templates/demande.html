@@ -1,23 +1,84 @@
+<p style="color: red; font-weight: bold;">TEST DEMANDE.HTML</p>
+
 {% extends 'base.html' %}
+{% block title %}Demande de Retrait{% endblock %}
+
 {% block content %}
-<h2>Demande de Retrait</h2>
-<form method="POST" enctype="multipart/form-data">
-    <label for="nom">Nom :</label><input type="text" name="nom" required><br>
-    <label for="prenom">Prénom :</label><input type="text" name="prenom" required><br>
-    <label for="matricule">Matricule :</label><input type="text" name="matricule" required><br>
-    <label for="filiere">Filière :</label><input type="text" name="filiere" required><br>
-    <label for="annee">Année :</label><input type="text" name="annee" required><br>
-    <label for="email">Email :</label><input type="email" name="email" required><br>
-    <label for="type_document">Type de document :</label>
-    <select name="type_document" required>
-        <option value="attestation">Attestation</option>
-        <option value="diplome">Diplôme</option>
-    </select><br>
-    <label>Pièces jointes (PDF uniquement) :</label><br>
-    <input type="file" name="fichier1" accept=".pdf" required><br>
-    <input type="file" name="fichier2" accept=".pdf" required><br>
-    <input type="file" name="fichier3" accept=".pdf" required><br>
-    <label for="quittance">Numéro de quittance :</label><input type="text" name="quittance" required><br>
-    <button type="submit">Soumettre la demande</button>
-</form>
+<div class="auth-outer">
+    <div class="auth-card shadow-lg rounded-4">
+        <h3 class="text-center mb-3 fw-bold">Demande de retrait</h3>
+
+        <p class="alert alert-info">
+            Veuillez soumettre vos fichiers au format <strong>PDF uniquement</strong>. Taille maximale : <strong>16 Mo</strong> par fichier.
+        </p>
+
+        <p class="text-muted mb-3" style="font-size: 0.9rem;">
+            Vérifiez bien toutes vos informations avant de soumettre. Vous ne pourrez pas modifier la demande après envoi.
+        </p>
+
+        <form method="POST" enctype="multipart/form-data" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="mb-2">
+                <label for="type_demande" class="form-label">Type de demande</label>
+                <select class="form-select" id="type_demande" name="type_demande" required>
+                    <option value="attestation_diplome">Attestation de diplôme</option>
+                    <option value="diplome">Diplôme de licence</option>
+                    <option value="attestation_passage_3A">Attestation de passage en 3e année</option>
+                    <option value="duplicata_attestation">Duplicata attestation de diplôme</option>
+                </select>
+            </div>
+
+            <div class="mb-2">
+                <label for="annee_scolaire" class="form-label">Année scolaire</label>
+                <input type="text" name="annee_scolaire" id="annee_scolaire" class="form-control" required>
+            </div>
+
+            <div class="mb-2">
+                <label for="numero_quittance" class="form-label">Numéro de quittance</label>
+                <input type="text" name="numero_quittance" id="numero_quittance" class="form-control" required>
+            </div>
+
+            <hr>
+            <h6 class="fw-bold">Pièces à fournir (PDF uniquement)</h6>
+
+            <div class="mb-2">
+                <label class="form-label" for="fichier_acte_naissance">Acte de naissance</label>
+                <input class="form-control" id="fichier_acte_naissance" name="fichier_acte_naissance" type="file" accept=".pdf" required>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label" for="fichier_carte_etudiant">Carte d’étudiant</label>
+                <input class="form-control" id="fichier_carte_etudiant" name="fichier_carte_etudiant" type="file" accept=".pdf" required>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label" for="fichier_releve_notes">Relevé de notes</label>
+                <input class="form-control" id="fichier_releve_notes" name="fichier_releve_notes" type="file" accept=".pdf" required>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label" for="fichier_demande_au_doyen">Demande au doyen</label>
+                <input class="form-control" id="fichier_demande_au_doyen" name="fichier_demande_au_doyen" type="file" accept=".pdf" required>
+            </div>
+
+            <hr>
+            <h6 class="fw-bold">Pièces complémentaires</h6>
+
+            <div class="mb-2">
+                <label class="form-label" for="recu">Reçu de paiement</label>
+                <input class="form-control" id="recu" name="recu" type="file" accept=".pdf" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="piece">Autre document justificatif</label>
+                <input class="form-control" id="piece" name="piece" type="file" accept=".pdf" required>
+            </div>
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-success w-100">Soumettre la demande</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

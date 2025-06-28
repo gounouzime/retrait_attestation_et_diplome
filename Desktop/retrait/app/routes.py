@@ -89,7 +89,7 @@ def etudiant_required(f):
 
 @routes.route('/')
 def accueil():
-    return render_template('index.html')
+    return render_template('index.html', wrap_content=False)
 
 @routes.route('/a_propos')
 def a_propos():

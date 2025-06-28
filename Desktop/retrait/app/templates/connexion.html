@@ -1,31 +1,34 @@
 {% extends 'base.html' %}
 {% block title %}Connexion{% endblock %}
-{% block content %}
-<h2>Connexion</h2>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    
-    {{ form.email.label }} 
-    {{ form.email(class="form-control") }}<br>
-    
-    {{ form.password.label }}
-    <div style="position: relative;">
-        {{ form.password(class="form-control", id="password") }}
-        <span onclick="togglePassword()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
-            👁️
-        </span>
-    </div>
-    <br>
-    
-    {{ form.submit(class="btn btn-primary") }}
-</form>
-<p>Pas encore inscrit ? <a href="{{ url_for('routes.confirmation') }}">Créer un compte</a></p>
 
-<script>
-    function togglePassword() {
-        const passwordField = document.getElementById("password");
-        const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
-        passwordField.setAttribute("type", type);
-    }
-</script>
+{% block content %}
+<div class="auth-outer">
+    <div class="auth-card shadow-lg rounded-4">
+        <h2 class="text-center mb-2 fw-bold text-dark">Connexion</h2>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-2">
+                {{ form.email.label(class="form-label mb-1") }}
+                {{ form.email(class="form-control form-control-sm py-1", placeholder="Entrez votre email") }}
+            </div>
+
+            <div class="mb-2 position-relative">
+                {{ form.password.label(class="form-label mb-1") }}
+                {{ form.password(class="form-control", id="password", placeholder="Mot de passe") }}
+                <i class="bi bi-eye eye-toggle" id="togglePassword"></i>
+            </div>
+
+
+            <div class="mt-2">
+                {{ form.submit(class="btn btn-success w-100 btn-sm") }}
+            </div>
+        </form>
+
+        <p class="text-center mt-2 mb-0" style="font-size: 0.85rem;">
+            Pas encore inscrit ? <a href="{{ url_for('routes.confirmation') }}">Créer un compte</a>
+        </p>
+    </div>
+</div>
 {% endblock %}
