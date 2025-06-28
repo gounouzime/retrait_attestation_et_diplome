@@ -9,18 +9,19 @@
         <a href="{{ url_for('routes.confirmation') }}" class="btn btn-orange">
             <i class="bi bi-person-plus-fill me-1"></i> Inscription
         </a>
-        <a href="{{ url_for('routes.connexion') }}" class="btn btn-outline-orange">
+        <a href="{{ url_for('routes.connexion') }}" class="btn btn-orange">
             <i class="bi bi-box-arrow-in-right me-1"></i> Connexion
         </a>
+
     </div>
 
     <!-- Texte centré avec animation -->
     <div class="hero-text animated-fade-in text-center px-3">
         <h2 class="mb-3">Bienvenue sur la plateforme de retrait d'attestation et diplôme</h2>
-        <p>
+        <div class="alert alert-info shadow-sm px-4 py-3 mt-3 rounded-3 text-dark fs-5 mx-auto" style="max-width: 800px;">
             Ce site vous permet de simplifier vos démarches administratives en déposant vos demandes en ligne,
             de suivre leur traitement, et de récupérer facilement vos documents officiels.
-        </p>
+        </div>
     </div>
 </div>
 {% endblock %}
