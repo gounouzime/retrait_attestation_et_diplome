@@ -81,7 +81,7 @@ form input, form select, form textarea {
 }
 
 /* Boutons */
-.btn {
+.btn-custom {
     background: var(--bleu-principal);
     color: var(--blanc);
     padding: 0.5rem 1rem;
@@ -90,9 +90,10 @@ form input, form select, form textarea {
     transition: background 0.3s ease;
 }
 
-.btn:hover {
+.btn-custom:hover {
     background: var(--violet-principal);
 }
+
 
 /* Tableaux */
 table {
@@ -385,14 +386,16 @@ table tr:nth-child(even) {
     color: white;
 }
 
-/* SECTION D'ACCUEIL AVEC IMAGE DE FOND */
 .hero-section {
     height: 100vh;
     width: 100%;
-    background: url('../img/etudiant.docs.jfif') no-repeat center center;
-    background-size: cover;
+    background-color: blue;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
+
 
 .hero-overlay {
     background: rgba(0, 0, 0, 0.5); /* assombrit légèrement l'image */
@@ -401,52 +404,53 @@ table tr:nth-child(even) {
     max-width: 800px;
 }
 
-/* === BOUTONS STYLES ORANGE === */
+/* === BOUTONS STYLES ORANGE-ROUGE === */
 .btn-orange {
-    background-color:green !important;
+    background-color: #d35400 !important; /* Orange rouge */
     color: white !important;
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    padding: 0.5rem 1.2rem;
+    font-weight: bold;
+    font-size: 16px;
     border: none;
-}
-.btn-orange:hover {
-    background-color:green;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
+.btn-orange:hover {
+    background-color: #e67e22 !important; /* plus clair au survol */
+    transform: translateY(-2px);
+}
+
+/* Variante avec contour seulement */
 .btn-outline-orange {
     background-color: transparent !important;
-    color: green !important;
-    border: 2px solid orange !important;
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
+    color: #d35400 !important;
+    border: 2px solid #d35400 !important;
+    border-radius: 30px;
+    padding: 0.5rem 1.2rem;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .btn-outline-orange:hover {
-    background-color: #f39c12;
-    color: white;
+    background-color: #d35400 !important;
+    color: white !important;
 }
 
-
-/* === SECTION D'ACCUEIL (image de fond + texte + boutons) === */
-.hero-section {
-    height: 100vh;
-    width: 100%;
-    background: url('../img/etudiant.docs.jfif') no-repeat center center;
-    background-size: cover;
-    position: relative;
-    filter: brightness(1.2); /* Rend l’image un peu plus claire */
-}
-
-/* Boutons positionnés en haut à droite */
+/* Positionnement des boutons en haut à droite */
 .hero-buttons {
     position: absolute;
     top: 30px;
-    left: 240px; /* Laisse de la place pour la sidebar */
+    left: 240px; /* pour compenser la sidebar */
     right: 3rem;
     display: flex;
     justify-content: flex-end;
     gap: 20px;
     z-index: 2;
 }
+
 
 /* Texte centré avec animation */
 .hero-text {
@@ -613,4 +617,41 @@ textarea.form-control {
 textarea.form-control {
     height: auto;
     resize: vertical;
+}
+/* Boutons spécifiques à la page d'accueil */
+.accueil-page .btn-orange-accueil {
+    background-color: #2ea36f !important; /* vert vif */
+    color: white !important;
+    border-radius: 12px;
+    padding: 0.9rem 2rem;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.accueil-page .btn-orange-accueil:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+}
+
+.accueil-page .btn-bleu-accueil {
+    background-color: #2f5db3 !important; /* bleu */
+    color: white !important;
+    border-radius: 12px;
+    padding: 0.9rem 2rem;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.accueil-page .btn-bleu-accueil:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+}
+.force-bootstrap-color {
+    background-color: #198754 !important; /* Vert Bootstrap */
+    border-color: #198754 !important;
+    color: #fff !important;
 }

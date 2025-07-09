@@ -5,15 +5,17 @@
 {% block content %}
 <div class="hero-section position-relative">
     <!-- Boutons positionnés à gauche et à droite -->
-    <div class="hero-buttons d-flex justify-content-between px-5 pt-4">
-        <a href="{{ url_for('routes.confirmation') }}" class="btn btn-orange">
-            <i class="bi bi-person-plus-fill me-1"></i> Inscription
+    <div class="hero-section accueil-page position-relative">
+    <div class="hero-buttons accueil-buttons px-5 pt-4">
+        <a href="{{ url_for('routes.confirmation') }}" class="btn btn-orange-accueil">
+            <i class="bi bi-person-plus-fill me-1"></i> S'inscrire
         </a>
-        <a href="{{ url_for('routes.connexion') }}" class="btn btn-orange">
-            <i class="bi bi-box-arrow-in-right me-1"></i> Connexion
+        <a href="{{ url_for('routes.connexion') }}" class="btn btn-bleu-accueil">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Se connecter
         </a>
-
     </div>
+    </div>
+
 
     <!-- Texte centré avec animation -->
     <div class="hero-text animated-fade-in text-center px-3">
@@ -25,3 +27,4 @@
     </div>
 </div>
 {% endblock %}
+
