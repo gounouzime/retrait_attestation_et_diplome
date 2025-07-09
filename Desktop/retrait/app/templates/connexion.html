@@ -2,9 +2,9 @@
 {% block title %}Connexion{% endblock %}
 
 {% block content %}
-<div class="auth-outer">
-    <div class="auth-card shadow-lg rounded-4">
-        <h2 class="text-center mb-2 fw-bold text-dark">Connexion</h2>
+<div class="auth-outer no-sidebar">
+    <div class="auth-card">
+        <h2 class="text-center mb-3 fw-bold text-dark" style="font-size: 1.75rem;">Connexion</h2>
 
         <form method="POST">
             {{ form.hidden_tag() }}
@@ -16,12 +16,12 @@
 
             <div class="mb-2 position-relative">
                 {{ form.password.label(class="form-label mb-1") }}
-                {{ form.password(class="form-control", id="password", placeholder="Mot de passe") }}
+                {{ form.password(class="form-control form-control-sm py-1", id="password", placeholder="Mot de passe") }}
                 <i class="bi bi-eye eye-toggle" id="togglePassword"></i>
             </div>
 
             <div class="mt-2">
-                {{ form.submit(class="btn btn-success w-100 btn-sm force-bootstrap-color") }}
+                {{ form.submit(class="btn btn-success w-100 btn-sm") }}
             </div>
         </form>
 

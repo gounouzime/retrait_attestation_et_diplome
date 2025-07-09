@@ -655,3 +655,39 @@ textarea.form-control {
     border-color: #198754 !important;
     color: #fff !important;
 }
+.table-dark th {
+    color: white !important;
+}
+.auth-outer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* 90vh → 100vh pour centrer pile au milieu */
+    padding: 2rem;      /* Plus d’espace sur petits écrans */
+    background-color: #f5f7fa; /* (facultatif) fond doux */
+}
+
+
+.auth-card {
+    width: 100%;
+    max-width: 1000px; /* ⇦ Largeur augmentée ici */
+    background-color: #ffffff;
+    padding: 2.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Style du conteneur de formulaire (connexion / inscription) */
+.form-container {
+    max-width: 700px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+@media (max-width: 768px) {
+    .auth-card {
+        max-width: 100%;
+        padding: 1.5rem;
+    }
+}
