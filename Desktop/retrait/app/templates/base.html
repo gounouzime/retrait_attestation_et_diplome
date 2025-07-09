@@ -4,17 +4,17 @@
     <meta charset="UTF-8" />
     <title>{% block title %}Retrait Diplômes{% endblock %}</title>
     
-    <!-- ✅ Bootstrap via CDN (au lieu du fichier local qui échoue) -->
+    <!-- ✅ Bootstrap via CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Ton style personnalisé -->
+    
+    <!-- ✅ Ton style personnalisé -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 
-    <!-- Icônes Bootstrap -->
+    <!-- ✅ Icônes Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 
-<body>
+<body class="{{ page_class|default('') }}"> <!-- ✅ Ajout de la classe dynamique -->
 
     {% if not no_sidebar %}
     <nav id="sidebar" class="bg-light p-3">
@@ -54,10 +54,10 @@
     <!-- ✅ Bootstrap JS via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Ton JS personnalisé -->
+    <!-- ✅ Ton JS personnalisé -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
-    <!-- SweetAlert -->
+    <!-- ✅ SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
