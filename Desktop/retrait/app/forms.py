@@ -3,7 +3,7 @@ from wtforms import StringField, PasswordField, SubmitField, SelectField, FileFi
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Regexp
 from flask_wtf.file import FileAllowed, FileRequired
 
-class ConnexionForm(FlaskForm):
+class ConnexionForm(FlaskForm):  # ✅ Hérite correctement, pas de désactivation CSRF
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Mot de passe', validators=[DataRequired()])
     submit = SubmitField('Se connecter')
@@ -129,12 +129,10 @@ class ReponseForm(FlaskForm):
 
 
 class ContactForm(FlaskForm):
-    nom = StringField('Nom', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    email = StringField('Votre adresse email', validators=[DataRequired(), Email()])
     sujet = StringField('Sujet', validators=[DataRequired()])
     message = TextAreaField('Message', validators=[DataRequired()])
     submit = SubmitField('Envoyer')
-
 
 
 class ConfirmationForm(FlaskForm):
@@ -190,3 +188,6 @@ class ConfirmationForm(FlaskForm):
     )
 
     submit = SubmitField("Valider mon identité")
+
+class SuppressionForm(FlaskForm):
+    submit = SubmitField('Supprimer') 

@@ -1,28 +1,55 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h2>Messagerie Étudiant</h2>
+<h2 class="mb-4">Messagerie Étudiant</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
 <style>
+  /* Conteneur global avec padding responsive */
   .message-box {
     border: 1px solid #ccc;
-    padding: 15px;
+    padding: 15px 20px;
     border-radius: 10px;
     background-color: #f9f9f9;
     margin-bottom: 20px;
+    word-wrap: break-word;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
+  /* Flex wrap pour éviter débordement */
   .message-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* Texte dans le header prend toute la place possible */
+  .message-header > div {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .badge {
-    padding: 5px 10px;
+    padding: 5px 12px;
     border-radius: 5px;
     color: white;
-    font-weight: bold;
+    font-weight: 600;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    flex-shrink: 0;
   }
 
   .badge.repondu {
@@ -33,25 +60,44 @@
     background-color: #dc3545;
   }
 
-  textarea {
+  textarea, .form-control {
     border-radius: 5px;
     padding: 10px;
     width: 100%;
     margin-top: 10px;
+    border: 1px solid #ccc;
+    resize: vertical;
+    font-size: 1rem;
+    box-sizing: border-box;
   }
 
-  button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 15px;
+  /* Boutons bien visibles et adaptatifs */
+  .btn {
     margin-top: 10px;
-    border-radius: 5px;
-    cursor: pointer;
+    border-radius: 6px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 220px;
   }
 
-  button:hover {
+  .btn-primary {
+    background-color: #007bff;
+    border: none;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-primary:hover {
     background-color: #0056b3;
+  }
+
+  .btn-danger {
+    background-color: #dc3545;
+    border: none;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-danger:hover {
+    background-color: #b02a37;
   }
 
   hr {
@@ -59,12 +105,40 @@
     border-top: 1px solid #ccc;
     margin: 20px 0;
   }
+
+  /* Texte et paragraphes adaptatifs */
+  p {
+    word-wrap: break-word;
+    font-size: 1rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 576px) {
+    .message-box {
+      padding: 12px 15px;
+    }
+    .badge {
+      font-size: 0.85rem;
+      padding: 4px 8px;
+    }
+    .btn {
+      font-size: 0.9rem;
+      max-width: 100%;
+    }
+  }
 </style>
 
 {% for msg in messages %}
   <div class="message-box">
     <div class="message-header">
-      <p><strong>De :</strong> {{ msg.nom }} ({{ msg.email }})</p>
+      <div>
+        <p><strong>De :</strong>
+          {{ msg.utilisateur.nom }} {{ msg.utilisateur.prenom }}
+          (<strong>Matricule :</strong> {{ msg.utilisateur.matricule }})<br>
+          <strong>Email :</strong> {{ msg.email }}
+        </p>
+      </div>
+
       {% if msg.reponse %}
         <span class="badge repondu">Répondu</span>
       {% else %}
@@ -78,14 +152,22 @@
 
     {% if not msg.reponse %}
       <form method="POST" action="{{ url_for('routes.repondre_message', message_id=msg.id) }}">
-        {{ csrf_token() }}
-        <textarea name="contenu" placeholder="Votre réponse ici" required rows="4"></textarea>
-        <button type="submit">Répondre</button>
+        {{ reponse_form.csrf_token() }}
+        {{ reponse_form.reponse(rows=4, class="form-control", placeholder="Votre réponse ici") }}
+        {{ reponse_form.submit(class="btn btn-primary") }}
       </form>
     {% else %}
       <p><strong>Réponse :</strong> {{ msg.reponse }}</p>
       <p><strong>Envoyée le :</strong> {{ msg.date_reponse.strftime('%d/%m/%Y %H:%M') }}</p>
     {% endif %}
+
+    <!-- Bouton de suppression -->
+    <form method="POST" action="{{ url_for('routes.supprimer_message', message_id=msg.id) }}"
+          onsubmit="return confirm('Supprimer ce message ? Cette action est irréversible.');">
+      <button type="submit" class="btn btn-danger btn-sm mt-2">
+        <i class="bi bi-trash"></i> Supprimer
+      </button>
+    </form>
   </div>
   <hr>
 {% endfor %}

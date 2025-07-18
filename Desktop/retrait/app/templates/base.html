@@ -2,62 +2,406 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Retrait Diplômes{% endblock %}</title>
-    
-    <!-- ✅ Bootstrap via CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- ✅ Ton style personnalisé -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 
-    <!-- ✅ Icônes Bootstrap -->
+    <!-- ✅ Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        /* ✅ WRAPPER PRINCIPAL AVEC FLEXBOX */
+        .main-wrapper {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        /* ✅ CONTENEUR PRINCIPAL AVEC SIDEBAR ET CONTENT */
+        .content-wrapper {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        #main {
+            display: flex;
+            flex: 1;
+        }
+
+        /* ✅ SIDEBAR FIXE SANS CHEVAUCHEMENT */
+        #sidebar {
+            width: 280px;
+            background: rgba(248, 249, 250, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid #ddd;
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        #sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        #sidebar a {
+            display: block;
+            color: #333;
+            padding: 10px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        #sidebar a:hover {
+            background: #007bff;
+            color: white;
+        }
+
+        #sidebar .logo-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        #sidebar .logo-section img {
+            max-width: 120px;
+            height: auto;
+        }
+
+        #sidebar .logo-section h5 {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        /* ✅ BOUTON MENU MOBILE */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* ✅ OVERLAY POUR MOBILE */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .mobile-overlay.show {
+            display: block;
+        }
+
+         /* ✅ CONTENT AREA AVEC MARGE POUR SIDEBAR */
+        #content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            background: #f4f4f4;
+            min-height: calc(100vh - 0px);
+            position: relative;
+        }
+
+        /* ✅ FOOTER POSITIONNÉ CORRECTEMENT - MODIFIÉ */
+        .footer-custom {
+            background-color: #111;
+            color: #f0f0f0;
+            font-size: 0.9rem;
+            margin-left: 280px; /* ✅ MARGE POUR ÉVITER LA SIDEBAR */
+            position: relative;
+            z-index: 100;
+            width: calc(100% - 280px); /* ✅ AJUSTEMENT DE LA LARGEUR */
+        }
+
+        /* ✅ CLASSE POUR PAGES SANS SIDEBAR */
+        .no-sidebar #sidebar {
+            display: none;
+        }
+
+        .no-sidebar #content {
+            margin-left: 0;
+        }
+
+        .no-sidebar .footer-custom {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .no-sidebar .mobile-menu-toggle {
+            display: none;
+        }
+
+        .footer-container {
+            background-color: #111;
+            color: white;
+            padding: 1rem;
+            border: none;           /* ✅ Supprime toute bordure */
+            box-shadow: none;       /* ✅ Supprime toute ombre */
+        }
+
+        .footer-custom a {
+            color: #f0f0f0;
+            text-decoration: none;
+            transition: color 0.25s ease;
+        }
+
+        .footer-custom a:hover,
+        .footer-custom a:focus {
+            color: #00ccff;
+            text-decoration: underline;
+        }
+
+        .footer-custom h5 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .social-icons i {
+            font-size: 1.2rem;
+            vertical-align: middle;
+        }
+
+        .footer-highlight {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: underline;
+            text-underline-offset: 6px;
+            text-decoration-thickness: 2.5px;
+            text-decoration-color: #00ccff;
+        }
+
+         /* ✅ RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            #sidebar {
+                transform: translateX(-100%);
+                padding: 1rem;
+            }
+
+            #sidebar.mobile-show {
+                transform: translateX(0);
+            }
+
+            #sidebar .logo-section {
+                margin-bottom: 1rem;
+            }
+
+            #sidebar .logo-section img {
+                max-width: 80px;
+            }
+
+            #sidebar .logo-section h5 {
+                font-size: 0.8rem;
+            }
+
+            #content {
+                margin-left: 0;
+                padding: 1rem;
+                padding-top: 4rem;
+                min-height: auto;
+            }
+
+            .footer-custom {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .footer-custom .row {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-custom .col-md-6 {
+                margin-bottom: 1rem;
+            }
+
+            .footer-highlight {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #content {
+                padding: 0.5rem;
+                padding-top: 3.5rem;
+            }
+
+            .footer-container {
+                padding: 0.5rem;
+            }
+
+            .footer-custom {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
 </head>
 
-<body class="{{ page_class|default('') }}"> <!-- ✅ Ajout de la classe dynamique -->
+<body class="{{ page_class|default('') }}">
+    <!-- ✅ BOUTON MENU MOBILE -->
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+    </button>
 
-    {% if not no_sidebar %}
-    <nav id="sidebar" class="bg-light p-3">
-        <div class="text-center mb-4">
-            <img src="{{ url_for('static', filename='img/images.jfif') }}" alt="Logo Université" style="max-height: 200px;" />
-            <h5 class="mt-2">Université de Natitingou</h5>
-        </div>
-        <a href="{{ url_for('routes.accueil') }}" class="d-block mb-2">Accueil</a>
-        <a href="{{ url_for('routes.connexion') }}" class="d-block mb-2">Connexion</a>
-        <a href="{{ url_for('routes.confirmation') }}" class="d-block mb-2">Inscription</a>
-        <a href="{{ url_for('routes.contact_admin') }}" class="d-block mb-2">Contact</a>
-        <a href="{{ url_for('routes.a_propos') }}" class="d-block mb-2">À propos</a>
-    </nav>
-    {% endif %}
+    <!-- ✅ OVERLAY MOBILE -->
+    <div class="mobile-overlay" onclick="closeMobileMenu()"></div>
 
-    {% if wrap_content is not defined or wrap_content %}
-    <div id="content" class="p-4 {% if no_sidebar %}no-sidebar{% endif %}">
-    {% endif %}
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
+    <!-- ✅ STRUCTURE MODIFIÉE POUR ÉVITER LES CHEVAUCHEMENTS -->
+    <div class="main-wrapper">
+        <div id="main" class="{% if no_sidebar %}no-sidebar{% endif %}">
+            {% if not no_sidebar %}
+            <nav id="sidebar">
+                <div class="logo-section">
+                    <img src="{{ url_for('static', filename='img/images.jfif') }}" alt="Logo Université" />
+                    <h5>Université Nationale des Sciences, Technologie, Ingénierie et Mathématiques</h5>
+                </div>
+                <a href="{{ url_for('routes.accueil') }}">
+                    <i class="fas fa-home"></i> Accueil
+                </a>
+                <a href="{{ url_for('routes.connexion') }}">
+                    <i class="fas fa-sign-in-alt"></i> Connexion
+                </a>
+                <a href="{{ url_for('routes.confirmation') }}">
+                    <i class="fas fa-user-plus"></i> Inscription
+                </a>
+                <a href="{{ url_for('routes.contact_admin') }}">
+                    <i class="fas fa-envelope"></i> Contact
+                </a>
+                <a href="{{ url_for('routes.a_propos') }}">
+                    <i class="fas fa-info-circle"></i> À propos
+                </a>
+            </nav>
             {% endif %}
-        {% endwith %}
 
-        {% block content %}{% endblock %}
+            <div id="content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
 
-    {% if wrap_content is not defined or wrap_content %}
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+
+        <!-- ✅ FOOTER POSITIONNÉ EN DEHORS DU CONTENEUR PRINCIPAL -->
+        <footer class="footer-custom" role="contentinfo">
+            <div class="container footer-container py-4 px-4">
+                <div class="row text-white">
+                    <div class="col-md-6 mb-3">
+                        <h5>Liens utiles</h5>
+                        <p class="mb-1">
+                            Hôtel de ville d'Abomey<br>
+                            BP 486 Abomey, Sogbo-Aliho
+                        </p>
+                        <p class="mb-1">
+                            Tél :
+                            <a href="tel:+22940522199" class="text-white text-decoration-none">+229 40 52 21 99</a> /
+                            <a href="tel:+22964057048" class="text-white text-decoration-none">+229 64 05 70 48</a>
+                        </p>
+                        <p class="mb-0">
+                            <a href="mailto:unstim@unstim.bj" class="text-white text-decoration-none">unstim@unstim.bj</a> /
+                            <a href="mailto:contact@unstim.bj" class="text-white text-decoration-none">contact@unstim.bj</a>
+                        </p>
+                    </div>
+
+                    <div class="col-md-6 text-md-end text-start">
+                        <h5 class="footer-highlight mb-2">Science et technologie au service de l'homme</h5>
+                        <p class="mb-1">© UNSTIM – 2025 – Tous droits réservés</p>
+                        <p class="mb-2">
+                            <a href="/politique-confidentialite" class="text-white text-decoration-none">Politique de confidentialité</a>
+                        </p>
+                        <div class="social-icons">
+                            <a href="https://www.facebook.com/unstim.bj/?locale=fr_FR" class="text-white me-3" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="https://www.instagram.com/unstimabomey/" class="text-white me-3" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                            <a href="https://bj.linkedin.com/company/unstim-abomey" class="text-white" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
-    {% endif %}
 
-    <!-- ✅ Bootstrap JS via CDN -->
+    <!-- ✅ Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- ✅ Ton JS personnalisé -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-
-    <!-- ✅ SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- ✅ JAVASCRIPT POUR MENU MOBILE -->
+    <script>
+        // Fonction pour basculer le menu mobile
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            
+            sidebar.classList.toggle('mobile-show');
+            overlay.classList.toggle('show');
+        }
+
+        // Fonction pour fermer le menu mobile
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            
+            sidebar.classList.remove('mobile-show');
+            overlay.classList.remove('show');
+        }
+
+        // Fermer le menu si on clique sur un lien
+        document.querySelectorAll('#sidebar a').forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Gérer le redimensionnement de la fenêtre
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeMobileMenu();
+            }
+        });
+    </script>
 </body>
 </html>

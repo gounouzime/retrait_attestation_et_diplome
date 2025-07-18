@@ -2,16 +2,17 @@
 {% block title %}Confirmation d'identité{% endblock %}
 
 {% block content %}
-<div class="auth-outer no-sidebar">
-    <div class="auth-card shadow-lg rounded-4 p-4 bg-white w-100" style="max-width: 700px;">
-        <h3 class="text-center mb-3 fw-bold text-dark">Confirmation</h3>
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="auth-card shadow-lg rounded-5 p-5 bg-white w-100" style="max-width: 650px;">
+        <h3 class="text-center mb-4 fw-bold text-dark">Confirmation d'identité</h3>
 
+        <!-- Notifications -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
                     <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                         {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
                     </div>
                 {% endfor %}
             {% endif %}
@@ -20,39 +21,51 @@
         <form method="POST" action="{{ url_for('routes.confirmation') }}">
             {{ form.hidden_tag() }}
 
-            <div class="row gx-3 gy-2">
-                <div class="col-sm-6">
-                    {{ form.nom.label(class="form-label mb-1") }}
-                    {{ form.nom(class="form-control form-control-sm py-2") }}
-                </div>
-                <div class="col-sm-6">
-                    {{ form.prenom.label(class="form-label mb-1") }}
-                    {{ form.prenom(class="form-control form-control-sm py-2") }}
-                </div>
-                <div class="col-sm-6">
-                    {{ form.email.label(class="form-label mb-1") }}
-                    {{ form.email(class="form-control form-control-sm py-2") }}
-                </div>
-                <div class="col-sm-6">
-                    {{ form.matricule.label(class="form-label mb-1") }}
-                    {{ form.matricule(class="form-control form-control-sm py-2") }}
-                </div>
-                <div class="col-sm-6">
-                    {{ form.numero.label(class="form-label mb-1") }}
-                    {{ form.numero(class="form-control form-control-sm py-2") }}
-                </div>
-                <div class="col-sm-6">
-                    {{ form.password.label(class="form-label mb-1") }}
-                    {{ form.password(class="form-control form-control-sm py-2") }}
-                </div>
-                <div class="col-sm-6">
-                    {{ form.confirm_password.label(class="form-label mb-1") }}
-                    {{ form.confirm_password(class="form-control form-control-sm py-2") }}
-                </div>
+            <!-- Champ Nom -->
+            <div class="mb-3">
+                {{ form.nom.label(class="form-label fw-semibold") }}
+                {{ form.nom(class="form-control py-3 px-3 rounded-4 fs-6") }}
             </div>
 
+            <!-- Champ Prénom -->
+            <div class="mb-3">
+                {{ form.prenom.label(class="form-label fw-semibold") }}
+                {{ form.prenom(class="form-control py-3 px-3 rounded-4 fs-6") }}
+            </div>
+
+            <!-- Champ Email -->
+            <div class="mb-3">
+                {{ form.email.label(class="form-label fw-semibold") }}
+                {{ form.email(class="form-control py-3 px-3 rounded-4 fs-6") }}
+            </div>
+
+            <!-- Champ Matricule -->
+            <div class="mb-3">
+                {{ form.matricule.label(class="form-label fw-semibold") }}
+                {{ form.matricule(class="form-control py-3 px-3 rounded-4 fs-6") }}
+            </div>
+
+            <!-- Champ Numéro -->
+            <div class="mb-3">
+                {{ form.numero.label(class="form-label fw-semibold") }}
+                {{ form.numero(class="form-control py-3 px-3 rounded-4 fs-6") }}
+            </div>
+
+            <!-- Champ Mot de passe -->
+            <div class="mb-3">
+                {{ form.password.label(class="form-label fw-semibold") }}
+                {{ form.password(class="form-control py-3 px-3 rounded-4 fs-6") }}
+            </div>
+
+            <!-- Champ Confirmation mot de passe -->
+            <div class="mb-3">
+                {{ form.confirm_password.label(class="form-label fw-semibold") }}
+                {{ form.confirm_password(class="form-control py-3 px-3 rounded-4 fs-6") }}
+            </div>
+
+            <!-- Bouton de soumission -->
             <div class="mt-4">
-                {{ form.submit(class="btn btn-success w-100 btn-sm force-bootstrap-color") }}
+                {{ form.submit(class="btn btn-success w-100 py-3 fs-6 rounded-4") }}
             </div>
         </form>
     </div>

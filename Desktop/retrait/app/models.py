@@ -112,7 +112,11 @@ class MessageContact(db.Model):
     reponse = db.Column(db.Text, nullable=True)
     date_reponse = db.Column(db.DateTime, nullable=True)
     lu_par_admin = db.Column(db.Boolean, default=False)
+    visible_admin = db.Column(db.Boolean, default=True)
 
+    # ✅ Relation avec Utilisateur
+    user_id = db.Column(db.Integer, db.ForeignKey('utilisateurs.id'), nullable=False)
+    utilisateur = db.relationship('Utilisateur', backref='messages_contact')
 
 class EtudiantReference(db.Model):
     __tablename__ = 'etudiants_reference'

@@ -3,7 +3,7 @@ import re
 from email_validator import validate_email, EmailNotValidError
 
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, send_from_directory, abort
-from flask_login import current_user
+from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
@@ -15,7 +15,7 @@ import os
 from functools import wraps
 
 from app.models import Utilisateur, Admin, Demande, DocumentAdmin, MessageContact, EtudiantReference
-from .forms import ConnexionForm, InscriptionForm, DemandeForm, ContactForm, MessageFormAdmin, ConfirmationForm
+from .forms import ConnexionForm, InscriptionForm, DemandeForm, ContactForm, MessageFormAdmin, ConfirmationForm, ReponseForm
 from .config import Config
 
 routes = Blueprint('routes', __name__)
@@ -94,6 +94,7 @@ def accueil():
 @routes.route('/a_propos')
 def a_propos():
     return render_template('a_propos.html')
+
 @routes.route('/connexion', methods=['GET', 'POST'])
 def connexion():
     form = ConnexionForm()
@@ -120,7 +121,6 @@ def connexion():
 def logout():
     session.clear()
     return redirect(url_for('routes.connexion'))
-
 
 # ========== Tableau de bord étudiant ==========
 
@@ -399,79 +399,109 @@ def confirmation():
 
     return render_template('confirmation.html', form=form)
 
-
-
-
-
 @routes.route('/contact_admin', methods=['GET', 'POST'])
+@login_required
 def contact_admin():
+    user_id = session.get('user_id')
+    user = Utilisateur.query.get(user_id)
+
+    if not user:
+        flash("Utilisateur introuvable. Veuillez vous reconnecter.", "danger")
+        return redirect(url_for('routes.logout'))
+
     form = ContactForm()
+
+    # ✅ On récupère bien uniquement les messages de l'étudiant connecté
+    anciens_messages = MessageContact.query.filter(
+        MessageContact.user_id == user.id
+    ).order_by(MessageContact.date_envoi.desc()).all()
+
     if form.validate_on_submit():
-        nom = form.nom.data.strip()
-        email = form.email.data.strip()
-        sujet = form.sujet.data.strip()
-        message = form.message.data.strip()
+        email_saisi = form.email.data.strip().lower()
+        email_officiel = user.email.strip().lower()
 
-        # (Optionnel) Validation supplémentaire email avec email_validator
+        # Vérification que l'email saisi correspond au compte
+        if email_saisi != email_officiel:
+            flash("L'adresse email saisie ne correspond pas à votre compte.", "danger")
+            return redirect(url_for('routes.contact_admin'))
+
+        # Validation syntaxique de l'adresse
         try:
-            validate_email(email)
-
+            validate_email(email_saisi)
         except EmailNotValidError:
             flash("Adresse e-mail invalide.", "danger")
             return redirect(url_for('routes.contact_admin'))
 
-        # Sauvegarde en base
-        msg_obj = MessageContact(nom=nom, email=email, sujet=sujet, contenu=message)
+        # ✅ Enregistrement du message
+        msg_obj = MessageContact(
+            email=email_officiel,
+            sujet=form.sujet.data.strip(),
+            contenu=form.message.data.strip(),
+            user_id=user.id
+        )
         db.session.add(msg_obj)
         db.session.commit()
 
-        # Envoi d’un e-mail de notification à l’admin
+        # ✅ Notification admin
         admin_msg = Message(
-            sujet,
-            sender=email,
-            recipients=['admin@email.com']
+            subject=form.sujet.data.strip(),
+            sender=email_officiel,
+            recipients=['gounouzime50@gmail.com'],
+            reply_to=email_officiel
         )
         admin_msg.body = f"""
-Nouveau message reçu depuis le formulaire de contact :
+Nouveau message reçu :
 
-Nom     : {nom}
-Email   : {email}
-Sujet   : {sujet}
+Étudiant : {user.nom} {user.prenom}
+Email    : {email_officiel}
+Matricule: {user.matricule}
+
+Sujet   : {form.sujet.data.strip()}
 
 Message :
-{message}
+{form.message.data.strip()}
 """
-        mail.send(admin_msg)
+        try:
+            mail.send(admin_msg)
+        except Exception:
+            flash("Erreur lors de l'envoi de l'e-mail de notification.", "warning")
 
-        flash('Message envoyé avec succès.', 'success')
+        flash("Message envoyé avec succès.", "success")
         return redirect(url_for('routes.contact_admin'))
 
-    return render_template('contact.html', form=form)
+    return render_template('contact.html', form=form, anciens_messages=anciens_messages)
+
+
 
 @routes.route('/admin/repondre/<int:message_id>', methods=['POST'])
 @login_required
 @admin_required
 def repondre_message(message_id):
-    message_origine = MessageContact.query.get_or_404(message_id)
-    reponse = request.form.get('reponse')
+    form = ReponseForm()
 
-    if not reponse:
+    if not form.validate_on_submit():
         flash("Veuillez saisir une réponse.", "danger")
-    return redirect(url_for('routes.admin_messagerie'))
+        return redirect(url_for('routes.admin_messagerie'))
 
+    message_origine = MessageContact.query.get_or_404(message_id)
 
-    message_origine.reponse = reponse
+    message_origine.reponse = form.reponse.data
+    message_origine.date_reponse = datetime.utcnow()
     message_origine.lu_par_admin = True
     db.session.commit()
 
-    # Envoi d’e-mail de réponse
-    msg = Message(f"Réponse à votre message: {message_origine.sujet}",
-                  sender='admin@email.com',
-                  recipients=[message_origine.email])
-    msg.body = reponse
-    mail.send(msg)
+    try:
+        msg = Message(
+            subject=f"Réponse à votre message : {message_origine.sujet}",
+            sender='admin@email.com',  # Remplace cette adresse par celle utilisée dans config
+            recipients=[message_origine.email]
+        )
+        msg.body = form.reponse.data
+        mail.send(msg)
+        flash("Réponse envoyée avec succès.", "success")
+    except Exception as e:
+        flash(f"Erreur lors de l'envoi de l'e-mail : {str(e)}", "danger")
 
-    flash("Réponse envoyée avec succès.", "success")
     return redirect(url_for('routes.admin_messagerie'))
 
 
@@ -480,7 +510,104 @@ def repondre_message(message_id):
 @admin_required
 def admin_messagerie():
     messages = MessageContact.query.order_by(MessageContact.date_envoi.desc()).all()
-    return render_template('admin_messagerie.html', messages=messages)
+    reponse_form = ReponseForm()
+    return render_template('admin_messagerie.html', messages=messages, reponse_form=reponse_form)
+
+@routes.route('/etudiant/message/supprimer/<int:message_id>', methods=['POST'])
+@login_required
+@etudiant_required
+def supprimer_message_etudiant(message_id):
+    message = MessageContact.query.get_or_404(message_id)
+    if message.user_id != session['user_id']:
+        flash("Action non autorisée.", "danger")
+        return redirect(url_for('routes.contact_admin'))
+
+    if message.reponse:
+        flash("Ce message a déjà été répondu. Suppression impossible.", "warning")
+        return redirect(url_for('routes.contact_admin'))
+
+    try:
+        db.session.delete(message)
+        db.session.commit()
+        flash("Message supprimé avec succès.", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Erreur lors de la suppression du message.", "danger")
+
+    return redirect(url_for('routes.contact_admin'))
+
+
+@routes.route('/admin/conversations')
+@login_required
+@admin_required
+def liste_conversations():
+    etudiants = Utilisateur.query \
+        .join(MessageContact, MessageContact.user_id == Utilisateur.id) \
+        .filter(Utilisateur.role == 'etudiant') \
+        .distinct() \
+        .all()
+    return render_template('liste_conversation.html', etudiants=etudiants)
+
+@routes.route('/admin/conversation/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_conversation(user_id):
+    etudiant = Utilisateur.query.get_or_404(user_id)
+    messages = MessageContact.query \
+        .filter_by(user_id=user_id) \
+        .order_by(MessageContact.date_envoi.asc()) \
+        .all()
+
+    # Marquer comme lus
+    for msg in messages:
+        if not msg.lu_par_admin:
+            msg.lu_par_admin = True
+    db.session.commit()
+
+    reponse_form = ReponseForm()
+
+    if reponse_form.validate_on_submit():
+        dernier_msg = messages[-1] if messages else None
+        if dernier_msg:
+            dernier_msg.reponse = reponse_form.reponse.data
+            dernier_msg.date_reponse = datetime.utcnow()
+
+            try:
+                msg_email = Message(
+                    subject=f"Réponse à votre message : {dernier_msg.sujet}",
+                    sender='admin@email.com',
+                    recipients=[etudiant.email],
+                    body=reponse_form.reponse.data
+                )
+                mail.send(msg_email)
+                db.session.commit()
+                flash("Réponse envoyée avec succès.", "success")
+            except Exception as e:
+                flash(f"Erreur lors de l'envoi de l'e-mail : {str(e)}", "danger")
+
+        return redirect(url_for('routes.admin_conversation', user_id=user_id))
+
+    return render_template(
+        'admin_messagerie.html',
+        etudiant=etudiant,
+        messages=messages,
+        reponse_form=reponse_form
+    )
+
+@routes.route('/admin/message/supprimer/<int:message_id>', methods=['POST'])
+@csrf.exempt 
+@login_required
+@admin_required
+def supprimer_message(message_id):
+    message = MessageContact.query.get_or_404(message_id)
+    try:
+        db.session.delete(message)
+        db.session.commit()
+        flash("Message supprimé avec succès.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Une erreur est survenue lors de la suppression du message.", "danger")
+    return redirect(request.referrer or url_for('routes.admin_messagerie'))
 
 
 @routes.route('/uploads/<filename>')

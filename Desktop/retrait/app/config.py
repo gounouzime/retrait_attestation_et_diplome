@@ -11,6 +11,6 @@ class Config:
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') or 'ton.email@gmail.com'  # remplace par ton adresse
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or 'ton_mdp_app'          # remplace par ton mot de passe
-    MAIL_DEFAULT_SENDER = MAIL_USERNAME
+    MAIL_USERNAME = "gounouzime50@gmail.com"  # remplace par ton adresse
+    MAIL_PASSWORD = "vvzgziobfrjfktsr"          # remplace par ton mot de passe
+    MAIL_DEFAULT_SENDER = MAIL_USERNAME 

@@ -3,30 +3,45 @@
 {% block title %}Connexion{% endblock %}
 
 {% block content %}
-<div class="auth-outer no-sidebar">
-    <div class="auth-card">
-        <h2 class="text-center mb-3 fw-bold text-dark" style="font-size: 1.75rem;">Connexion</h2>
+<div class="auth-outer no-sidebar d-flex justify-content-center align-items-center" style="min-height: 100vh; background: #f3f4f6;">
+    <div class="auth-card shadow" style="
+        width: 100%;
+        max-width: 600px;
+        padding: 3rem;
+        border-radius: 1.5rem;
+        background: white;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    ">
+        <h2 class="text-center mb-4 fw-bold text-dark" style="font-size: 2rem;">Connexion</h2>
 
         <form method="POST">
             {{ form.hidden_tag() }}
 
-            <div class="mb-2">
-                {{ form.email.label(class="form-label mb-1") }}
-                {{ form.email(class="form-control form-control-sm py-1", placeholder="Entrez votre email") }}
+
+            <div class="mb-4">
+                {{ form.email.label(class="form-label fw-semibold", style="font-size: 1rem;") }}
+                {{ form.email(class="form-control", style="height: 3.2rem; font-size: 1rem;", placeholder="Entrez votre email") }}
             </div>
 
-            <div class="mb-2 position-relative">
-                {{ form.password.label(class="form-label mb-1") }}
-                {{ form.password(class="form-control form-control-sm py-1", id="password", placeholder="Mot de passe") }}
-                <i class="bi bi-eye eye-toggle" id="togglePassword"></i>
+            <div class="mb-4 position-relative">
+                {{ form.password.label(class="form-label fw-semibold", style="font-size: 1rem;") }}
+                {{ form.password(class="form-control", style="height: 3.2rem; font-size: 1rem;", id="password", placeholder="Mot de passe") }}
+                <i class="bi bi-eye eye-toggle position-absolute" id="togglePassword" style="
+                    top: 70%;
+                    right: 15px;
+                    transform: translateY(-50%);
+                    cursor: pointer;
+                    font-size: 1.2rem;
+                    color: #666;
+                "></i>
             </div>
 
-            <div class="mt-2">
-                {{ form.submit(class="btn btn-success w-100 btn-sm") }}
+            <div class="mt-4">
+                {{ form.submit(class="btn btn-success w-100 py-3 fw-bold", style="font-size: 1rem;") }}
             </div>
         </form>
 
-        <p class="text-center mt-2 mb-0" style="font-size: 0.85rem;">
+        <p class="text-center mt-4 mb-0" style="font-size: 0.9rem;">
             Pas encore inscrit ? <a href="{{ url_for('routes.confirmation') }}">Créer un compte</a>
         </p>
     </div>

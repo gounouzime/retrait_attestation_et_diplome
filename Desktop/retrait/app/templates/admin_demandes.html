@@ -1,142 +1,335 @@
 {% extends 'base.html' %}
+{% block title %}Gestion des demandes{% endblock %}
+
 {% block content %}
-<h2>Liste des demandes</h2>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="page-title">
+                <i class="fas fa-clipboard-list"></i> 
+                Liste des demandes
+            </h2>
+        </div>
+    </div>
 
-<table class="table-demandes">
-  <thead>
-    <tr>
-      <th>Nom</th>
-      <th>Prénom</th>
-      <th>Matricule</th>
-      <th>Filière</th>
-      <th>Année</th>
-      <th>Email</th>
-      <th>Type de demande</th>
-      <th>Fichiers</th>
-      <th>Statut</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for demande in demandes %}
-    <tr>
-      <td>{{ demande.utilisateur.nom }}</td>
-      <td>{{ demande.utilisateur.prenom }}</td>
-      <td>{{ demande.utilisateur.matricule }}</td>
-      <td>{{ demande.utilisateur.filiere }}</td>
-      <td>{{ demande.utilisateur.annee }}</td>
-      <td>{{ demande.utilisateur.email }}</td>
-      <td>{{ demande.type_demande }}</td>
-      <td>
-        {% if demande.fichier_acte_naissance %}
-          <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_acte_naissance) }}" target="_blank">Acte</a><br>
-        {% endif %}
-        {% if demande.fichier_carte_etudiant %}
-          <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_carte_etudiant) }}" target="_blank">Carte</a><br>
-        {% endif %}
-        {% if demande.fichier_releve_notes %}
-          <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_releve_notes) }}" target="_blank">Relevé</a><br>
-        {% endif %}
-        {% if demande.fichier_demande_au_doyen %}
-          <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_demande_au_doyen) }}" target="_blank">Lettre Doyen</a><br>
-        {% endif %}
-        {% if demande.fichier_recu %}
-          <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_recu) }}" target="_blank">Reçu</a><br>
-        {% endif %}
-        {% if demande.fichier_piece %}
-          <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_piece) }}" target="_blank">Pièce</a><br>
-        {% endif %}
-      </td>
-      <td>
-        {% if demande.statut == 'Validée' %}
-          <span class="badge-validee">Validée</span>
-        {% elif demande.statut == 'Refusée' %}
-          <span class="badge-refusee">Refusée</span>
-        {% else %}
-          <span class="badge-en-attente">En attente</span>
-        {% endif %}
-      </td>
-      <td>
-      <form method="POST" action="{{ url_for('routes.traiter_demande', demande_id=demande.id) }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <!-- Tableau pour desktop -->
+    <div class="table-responsive d-none d-lg-block">
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Étudiant</th>
+                    <th>Contact</th>
+                    <th>Formation</th>
+                    <th>Demande</th>
+                    <th>Fichiers</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for demande in demandes %}
+                <tr>
+                    <td>
+                        <strong>{{ demande.utilisateur.nom }} {{ demande.utilisateur.prenom }}</strong><br>
+                        <small class="text-muted">{{ demande.utilisateur.matricule }}</small>
+                    </td>
+                    <td>
+                        <i class="fas fa-envelope"></i> {{ demande.utilisateur.email }}
+                    </td>
+                    <td>
+                        <strong>{{ demande.utilisateur.filiere }}</strong><br>
+                        <small class="text-muted">{{ demande.utilisateur.annee }}</small>
+                    </td>
+                    <td>{{ demande.type_demande }}</td>
+                    <td>
+                        <div class="file-links">
+                            {% if demande.fichier_acte_naissance %}
+                                <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_acte_naissance) }}" target="_blank" class="file-link">
+                                    <i class="fas fa-file-pdf"></i> Acte
+                                </a>
+                            {% endif %}
+                            {% if demande.fichier_carte_etudiant %}
+                                <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_carte_etudiant) }}" target="_blank" class="file-link">
+                                    <i class="fas fa-id-card"></i> Carte
+                                </a>
+                            {% endif %}
+                            {% if demande.fichier_releve_notes %}
+                                <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_releve_notes) }}" target="_blank" class="file-link">
+                                    <i class="fas fa-file-alt"></i> Relevé
+                                </a>
+                            {% endif %}
+                            {% if demande.fichier_demande_au_doyen %}
+                                <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_demande_au_doyen) }}" target="_blank" class="file-link">
+                                    <i class="fas fa-envelope"></i> Lettre
+                                </a>
+                            {% endif %}
+                            {% if demande.fichier_recu %}
+                                <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_recu) }}" target="_blank" class="file-link">
+                                    <i class="fas fa-receipt"></i> Reçu
+                                </a>
+                            {% endif %}
+                            {% if demande.fichier_piece %}
+                                <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_piece) }}" target="_blank" class="file-link">
+                                    <i class="fas fa-paperclip"></i> Pièce
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge
+                            {% if demande.statut == 'Validée' %} badge-success
+                            {% elif demande.statut == 'Refusée' %} badge-danger
+                            {% else %} badge-secondary {% endif %}">
+                            {{ demande.statut or "En attente" }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <form method="POST" action="{{ url_for('routes.traiter_demande', demande_id=demande.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                
+                                <button type="submit" name="decision" value="valider" class="btn btn-success btn-sm">
+                                    <i class="fas fa-check"></i> Valider
+                                </button>
+                                
+                                <select name="raison_refus" id="raison_{{ demande.id }}" class="form-select form-select-sm mt-1">
+                                    <option value="">Raison du refus</option>
+                                    <option value="Dossier incomplet">Dossier incomplet</option>
+                                    <option value="Documents illisibles">Documents illisibles</option>
+                                    <option value="Paiement non justifié">Paiement non justifié</option>
+                                    <option value="Demande non conforme">Demande non conforme</option>
+                                    <option value="autre">Autre</option>
+                                </select>
+                                
+                                <input type="text" name="raison_personnalisee" id="raison_perso_{{ demande.id }}"
+                                      class="form-control form-control-sm mt-1" placeholder="Raison personnalisée"
+                                      style="display:none;">
+                                
+                                <button type="submit" name="decision" value="refuser" class="btn btn-danger btn-sm mt-1">
+                                    <i class="fas fa-times"></i> Refuser
+                                </button>
+                            </form>
+                            
+                            {% if demande.statut == 'Validée' %}
+                                <form method="POST" action="{{ url_for('routes.upload_document', demande_id=demande.id) }}" enctype="multipart/form-data" class="mt-2">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="file" name="document_admin" required class="form-control form-control-sm">
+                                    
+                                    <select name="type" required class="form-select form-select-sm mt-1">
+                                        <option value="">Type de document</option>
+                                        <option value="Diplôme de Licence">Diplôme de Licence</option>
+                                        <option value="Attestation de Diplôme">Attestation de Diplôme</option>
+                                        <option value="Attestation de passage en L3">Attestation de passage en L3</option>
+                                        <option value="Duplicata attestation de diplôme">Duplicata attestation de diplôme</option>
+                                    </select>
+                                    
+                                    <button type="submit" class="btn btn-primary btn-sm mt-1">
+                                        <i class="fas fa-upload"></i> Uploader
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                
+                {% if demande.statut == 'Validée' and demande.documents_admin %}
+                <tr class="documents-admin-row">
+                    <td colspan="7">
+                        <div class="documents-admin-section">
+                            <h6><i class="fas fa-file-upload"></i> Documents administratifs ajoutés :</h6>
+                            <div class="documents-list">
+                                {% for doc in demande.documents_admin %}
+                                    <div class="document-item">
+                                        <i class="fas fa-file-pdf text-danger"></i>
+                                        <strong>{{ doc.type }}</strong> :
+                                        <a href="{{ url_for('routes.uploaded_file', filename=doc.filename) }}" target="_blank">Télécharger</a>
+                                        {% if doc.date_upload %}
+                                            <small class="text-muted">({{ doc.date_upload.strftime('%d/%m/%Y à %Hh%M') }})</small>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-        <button type="submit" name="decision" value="valider" class="btn-valider">Valider</button>
+    <!-- Cards pour mobile/tablette -->
+    <div class="d-block d-lg-none">
+        {% for demande in demandes %}
+        <div class="demande-card card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="etudiant-info">
+                    <h6 class="etudiant-name mb-0">
+                        <i class="fas fa-user"></i>
+                        {{ demande.utilisateur.nom }} {{ demande.utilisateur.prenom }}
+                    </h6>
+                    <small class="text-muted">{{ demande.utilisateur.matricule }}</small>
+                </div>
+                <span class="badge
+                    {% if demande.statut == 'Validée' %} badge-success
+                    {% elif demande.statut == 'Refusée' %} badge-danger
+                    {% else %} badge-secondary {% endif %}">
+                    {{ demande.statut or "En attente" }}
+                </span>
+            </div>
+            
+            <div class="card-body">
+                <div class="info-row mb-2">
+                    <span class="label"><i class="fas fa-envelope"></i> Email:</span>
+                    <span class="value">{{ demande.utilisateur.email }}</span>
+                </div>
+                
+                <div class="info-row mb-2">
+                    <span class="label"><i class="fas fa-graduation-cap"></i> Formation:</span>
+                    <span class="value">{{ demande.utilisateur.filiere }} - {{ demande.utilisateur.annee }}</span>
+                </div>
+                
+                <div class="info-row mb-2">
+                    <span class="label"><i class="fas fa-file-alt"></i> Demande:</span>
+                    <span class="value">{{ demande.type_demande }}</span>
+                </div>
+                
+                {% if demande.fichier_acte_naissance or demande.fichier_carte_etudiant or demande.fichier_releve_notes or demande.fichier_demande_au_doyen or demande.fichier_recu or demande.fichier_piece %}
+                <div class="info-row mb-2">
+                    <span class="label"><i class="fas fa-paperclip"></i> Fichiers:</span>
+                    <div class="file-links">
+                        {% if demande.fichier_acte_naissance %}
+                            <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_acte_naissance) }}" target="_blank" class="file-link me-2">
+                                <i class="fas fa-file-pdf"></i> Acte
+                            </a>
+                        {% endif %}
+                        {% if demande.fichier_carte_etudiant %}
+                            <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_carte_etudiant) }}" target="_blank" class="file-link me-2">
+                                <i class="fas fa-id-card"></i> Carte
+                            </a>
+                        {% endif %}
+                        {% if demande.fichier_releve_notes %}
+                            <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_releve_notes) }}" target="_blank" class="file-link me-2">
+                                <i class="fas fa-file-alt"></i> Relevé
+                            </a>
+                        {% endif %}
+                        {% if demande.fichier_demande_au_doyen %}
+                            <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_demande_au_doyen) }}" target="_blank" class="file-link me-2">
+                                <i class="fas fa-envelope"></i> Lettre
+                            </a>
+                        {% endif %}
+                        {% if demande.fichier_recu %}
+                            <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_recu) }}" target="_blank" class="file-link me-2">
+                                <i class="fas fa-receipt"></i> Reçu
+                            </a>
+                        {% endif %}
+                        {% if demande.fichier_piece %}
+                            <a href="{{ url_for('routes.uploaded_file', filename=demande.fichier_piece) }}" target="_blank" class="file-link me-2">
+                                <i class="fas fa-paperclip"></i> Pièce
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
 
-        <select name="raison_refus" id="raison_{{ demande.id }}" class="select-raison">
-          <option value="">Raison du refus</option>
-          <option value="Dossier incomplet">Dossier incomplet</option>
-          <option value="Documents illisibles">Documents illisibles</option>
-          <option value="Paiement non justifié">Paiement non justifié</option>
-          <option value="Demande non conforme">Demande non conforme</option>
-          <option value="autre">Autre</option>
-        </select>
+                <div class="action-buttons mt-3">
+                    <form method="POST" action="{{ url_for('routes.traiter_demande', demande_id=demande.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <button type="submit" name="decision" value="valider" class="btn btn-success btn-sm mb-1 w-100">
+                            <i class="fas fa-check"></i> Valider
+                        </button>
+                        
+                        <select name="raison_refus" id="raison_mobile_{{ demande.id }}" class="form-select form-select-sm mb-1">
+                            <option value="">Raison du refus</option>
+                            <option value="Dossier incomplet">Dossier incomplet</option>
+                            <option value="Documents illisibles">Documents illisibles</option>
+                            <option value="Paiement non justifié">Paiement non justifié</option>
+                            <option value="Demande non conforme">Demande non conforme</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                        
+                        <input type="text" name="raison_personnalisee" id="raison_perso_mobile_{{ demande.id }}"
+                              class="form-control form-control-sm mb-1" placeholder="Raison personnalisée"
+                              style="display:none;">
+                        
+                        <button type="submit" name="decision" value="refuser" class="btn btn-danger btn-sm w-100">
+                            <i class="fas fa-times"></i> Refuser
+                        </button>
+                    </form>
 
-        <input type="text" name="raison_personnalisee" id="raison_perso_{{ demande.id }}"
-              placeholder="Raison personnalisée"
-              style="display:none; margin-top:5px; border-radius:5px; padding:4px; border:1px solid #ccc; width: 90%;">
+                    {% if demande.statut == 'Validée' %}
+                        <form method="POST" action="{{ url_for('routes.upload_document', demande_id=demande.id) }}" enctype="multipart/form-data" class="mt-3">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="file" name="document_admin" required class="form-control form-control-sm mb-2">
+                            
+                            <select name="type" required class="form-select form-select-sm mb-2">
+                                <option value="">Type de document</option>
+                                <option value="Diplôme de Licence">Diplôme de Licence</option>
+                                <option value="Attestation de Diplôme">Attestation de Diplôme</option>
+                                <option value="Attestation de passage en L3">Attestation de passage en L3</option>
+                                <option value="Duplicata attestation de diplôme">Duplicata attestation de diplôme</option>
+                            </select>
+                            
+                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                <i class="fas fa-upload"></i> Uploader
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
 
-        <button type="submit" name="decision" value="refuser" class="btn-refuser" style="margin-top:5px;">Refuser</button>
-      </form>
-
-      {% if demande.statut == 'Validée' %}
-        <form method="POST" action="{{ url_for('routes.upload_document', demande_id=demande.id) }}" enctype="multipart/form-data" style="margin-top: 10px;">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <input type="file" name="document_admin" required style="margin-bottom: 5px;">
-          
-          <select name="type" required style="margin-bottom: 5px; padding: 4px; border-radius: 5px; border: 1px solid #ccc;">
-            <option value="">-- Type de document --</option>
-            <option value="Diplôme de Licence">Diplôme de Licence</option>
-            <option value="Attestation de Diplôme">Attestation de Diplôme</option>
-            <option value="Attestation de passage en L3">Attestation de passage en L3</option>
-            <option value="Duplicata attestation de diplôme">Duplicata attestation de diplôme</option>
-          </select>
-
-          <button type="submit" class="btn-upload">Uploader</button>
-        </form>
-      {% endif %}
-
-      </td>
-    </tr>
-
-    {% if demande.statut == 'Validée' and demande.documents_admin %}
-    <tr class="ligne-documents-admin">
-      <td colspan="10" style="background-color: #f8f8f8; padding: 10px;">
-        <strong>Documents administratifs ajoutés :</strong><br>
-       {% for doc in demande.documents_admin %}
-          • <strong>{{ doc.type }}</strong> : 
-          <a href="{{ url_for('routes.uploaded_file', filename=doc.filename) }}" target="_blank">Voir</a>
-          {% if doc.date_upload %}
-            (ajouté le {{ doc.date_upload.strftime('%d/%m/%Y à %Hh%M') }})
-          {% else %}
-            (date non renseignée)
-          {% endif %} 
-          <br>
-       {% endfor %}
-
-      </td>
-    </tr>
-    {% endif %}
-
-    {% endfor %}
-  </tbody>
-</table>
+                {% if demande.statut == 'Validée' and demande.documents_admin %}
+                <div class="documents-admin-section mt-3">
+                    <h6><i class="fas fa-file-upload"></i> Documents administratifs ajoutés :</h6>
+                    <div class="documents-list">
+                        {% for doc in demande.documents_admin %}
+                            <div class="document-item mb-1">
+                                <i class="fas fa-file-pdf text-danger"></i>
+                                <strong>{{ doc.type }}</strong> :
+                                <a href="{{ url_for('routes.uploaded_file', filename=doc.filename) }}" target="_blank">Télécharger</a>
+                                {% if doc.date_upload %}
+                                    <small class="text-muted">({{ doc.date_upload.strftime('%d/%m/%Y à %Hh%M') }})</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.select-raison').forEach(select => {
-      select.addEventListener('change', function () {
-        const id = this.id.split('_')[1];
-        const champPerso = document.getElementById('raison_perso_' + id);
-        if (this.value === 'autre') {
-          champPerso.style.display = 'inline-block';
-          champPerso.required = true;
-        } else {
-          champPerso.style.display = 'none';
-          champPerso.required = false;
-          champPerso.value = '';
-        }
-      });
+    // Afficher ou cacher le champ "raison personnalisée" selon la sélection dans le select de refus desktop
+    document.querySelectorAll('select[name="raison_refus"]').forEach(select => {
+        select.addEventListener('change', function() {
+            const demandeId = this.id.split('_')[1];
+            const inputPerso = document.getElementById('raison_perso_' + demandeId);
+            if (this.value === 'autre') {
+                inputPerso.style.display = 'block';
+            } else {
+                inputPerso.style.display = 'none';
+                inputPerso.value = '';
+            }
+        });
     });
-  });
+
+    // Même chose pour la version mobile
+    document.querySelectorAll('select[name="raison_refus"]').forEach(select => {
+        if (select.id.startsWith('raison_mobile_')) {
+            select.addEventListener('change', function() {
+                const demandeId = this.id.split('_')[2];
+                const inputPerso = document.getElementById('raison_perso_mobile_' + demandeId);
+                if (this.value === 'autre') {
+                    inputPerso.style.display = 'block';
+                } else {
+                    inputPerso.style.display = 'none';
+                    inputPerso.value = '';
+                }
+            });
+        }
+    });
 </script>
 {% endblock %}
