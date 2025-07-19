@@ -22,3 +22,4 @@ email-validator
 PyMuPDF
 flask-talisman
 Flask-Limiter==3.12
+python-dotenv
