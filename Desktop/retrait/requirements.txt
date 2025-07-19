@@ -21,3 +21,4 @@ Flask-Mail==0.9.1
 email-validator
 PyMuPDF
 flask-talisman
+Flask-Limiter==3.12
