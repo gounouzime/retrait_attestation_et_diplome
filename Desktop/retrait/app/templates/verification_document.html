@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Document Vérifié{% endblock %}
+{% set no_sidebar = False %}
+{% set no_footer = True %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-success text-center">
+        <h1 class="mb-4">✅ Document authentique</h1>
+        <p>Ce document a été délivré par l’administration.</p>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>Nom :</strong> {{ utilisateur.nom }} {{ utilisateur.prenom }}</li>
+                <li class="list-group-item"><strong>Type de document :</strong> {{ document.type_document }}</li>
+                <li class="list-group-item"><strong>Année :</strong> {{ document.annee }}</li>
+                <li class="list-group-item"><strong>Filière :</strong> {{ document.filiere }}</li>
+                <li class="list-group-item"><strong>Matricule :</strong> {{ utilisateur.matricule }}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

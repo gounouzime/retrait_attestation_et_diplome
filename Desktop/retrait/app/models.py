@@ -3,6 +3,7 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from app import db
+from hashlib import sha256
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin 
 
@@ -19,8 +20,6 @@ class Utilisateur(db.Model, UserMixin):
     numero = db.Column(db.String(20))
     annee = db.Column(db.String(10))
     filiere = db.Column(db.String(100))
-
-    demandes = db.relationship('Demande', back_populates='utilisateur', cascade="all, delete-orphan", lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -47,13 +46,23 @@ class Demande(db.Model):
     quittance_valide = db.Column(db.Boolean, default=True)
     annee_scolaire = db.Column(db.String(20), nullable=True)
     date_demande = db.Column(db.DateTime, default=datetime.utcnow)
+    date_creation = db.Column(db.DateTime, default=datetime.utcnow)
     statut = db.Column(db.String(20), default='En attente')
     raison_refus = db.Column(db.String(255))
 
-    utilisateur_id = db.Column(db.Integer, db.ForeignKey('utilisateurs.id'))
-    utilisateur = db.relationship('Utilisateur', back_populates='demandes')
+    utilisateur_id = db.Column(db.Integer, db.ForeignKey('utilisateurs.id'), nullable=True)
+    utilisateur = db.relationship(
+        "Utilisateur",
+        backref=db.backref("documents_admin", overlaps="demandes"),
+        overlaps="demandes"
+    )
 
-    documents_admin = db.relationship('DocumentAdmin', back_populates='demande', lazy=True)
+    documents_admin = db.relationship(
+        'DocumentAdmin',
+        back_populates='demande',
+        lazy=True,
+        overlaps="demandes"
+    )
 
     def statut_affichage(self):
         return {
@@ -61,8 +70,6 @@ class Demande(db.Model):
             "Validée": "✅ Validée",
             "Refusée": f"❌ Refusée ({self.raison_refus})"
         }.get(self.statut, self.statut)
-
-
 
 
 class DocumentAdmin(db.Model):
@@ -74,14 +81,12 @@ class DocumentAdmin(db.Model):
     annee = db.Column(db.String(10), nullable=True)
     filiere = db.Column(db.String(100), nullable=True)
     date_upload = db.Column(db.DateTime, default=datetime.utcnow)
+    hash_document = db.Column(db.String(64), unique=True, nullable=True) 
+    qr_code_path = db.Column(db.String(255))  # ✅ si tu veux le chemin du fichier avec QR
 
     demande_id = db.Column(db.Integer, db.ForeignKey('demandes.id'), nullable=True)
 
-    # Relation vers la demande correspondante
     demande = db.relationship("Demande", back_populates="documents_admin")
-
-
-
 
 
 class Admin(db.Model):
@@ -114,9 +119,9 @@ class MessageContact(db.Model):
     lu_par_admin = db.Column(db.Boolean, default=False)
     visible_admin = db.Column(db.Boolean, default=True)
 
-    # ✅ Relation avec Utilisateur
     user_id = db.Column(db.Integer, db.ForeignKey('utilisateurs.id'), nullable=False)
     utilisateur = db.relationship('Utilisateur', backref='messages_contact')
+
 
 class EtudiantReference(db.Model):
     __tablename__ = 'etudiants_reference'
@@ -138,7 +143,7 @@ class ResultatAcademique(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     matricule = db.Column(db.String(20), nullable=False)
     annee_scolaire = db.Column(db.String(20), nullable=False)
-    niveau = db.Column(db.String(10), nullable=False)  # "2A" ou "3A"
+    niveau = db.Column(db.String(10), nullable=False)
     valide = db.Column(db.Boolean, default=False)
 
 
@@ -146,7 +151,7 @@ class ReferenceQuittance(db.Model):
     __tablename__ = 'references_quittances'
 
     id = db.Column(db.Integer, primary_key=True)
-    numero = db.Column(db.String(100), unique=True, nullable=False)  # Ex: QT123456
+    numero = db.Column(db.String(100), unique=True, nullable=False)
 
     def __repr__(self):
         return f"<ReferenceQuittance {self.numero}>"

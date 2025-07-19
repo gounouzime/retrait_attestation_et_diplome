@@ -170,12 +170,13 @@
                     </h6>
                     <small class="text-muted">{{ demande.utilisateur.matricule }}</small>
                 </div>
-                <span class="badge
-                    {% if demande.statut == 'Validée' %} badge-success
-                    {% elif demande.statut == 'Refusée' %} badge-danger
-                    {% else %} badge-secondary {% endif %}">
+                <span class="badge text-white 
+                    {% if demande.statut == 'Validée' %} bg-success
+                    {% elif demande.statut == 'Refusée' %} bg-danger
+                    {% else %} bg-secondary {% endif %}">
                     {{ demande.statut or "En attente" }}
                 </span>
+
             </div>
             
             <div class="card-body">

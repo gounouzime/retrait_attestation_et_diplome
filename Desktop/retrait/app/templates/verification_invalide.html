@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Document Invalide{% endblock %}
+{% set no_sidebar = False %}
+{% set no_footer = True %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-danger text-center">
+        <h1 class="mb-3">❌ Document non reconnu</h1>
+        <p>Ce document n’est pas répertorié dans notre base. Il peut être falsifié ou invalide.</p>
+    </div>
+</div>
+{% endblock %}

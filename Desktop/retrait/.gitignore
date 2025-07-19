@@ -1,10 +1,35 @@
-# .gitignore
+# Environnement virtuel
 venv/
+ENV/
+env/
+.venv/
+
+# Fichiers Python compilés
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+
+# Fichiers d’environnement
 .env
-instance/
 .env.*
+instance/
+
+# Base de données
 *.db
+*.sqlite3
+
+# Fichiers de logs
+logs/
+*.log
+
+# Migrations (facultatif selon usage)
+migrations/
+
+# Cache de l'éditeur
+.vscode/
+.idea/
+*.swp
+
+# Autres fichiers temporaires
+.DS_Store
+Thumbs.db

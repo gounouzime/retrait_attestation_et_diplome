@@ -16,14 +16,21 @@
             margin: 0;
             padding: 0;
             height: 100%;
+            flex-direction: column;
         }
 
         /* ✅ WRAPPER PRINCIPAL AVEC FLEXBOX */
         .main-wrapper {
             display: flex;
-            min-height: 100vh;
             flex-direction: column;
+            min-height: 100vh;
         }
+
+        #main {
+            flex-grow: 1;  /* ✅ C’est ici que ça doit être */
+            display: flex;
+        }
+
 
         /* ✅ CONTENEUR PRINCIPAL AVEC SIDEBAR ET CONTENT */
         .content-wrapper {
@@ -134,8 +141,10 @@
             margin-left: 280px;
             padding: 2rem;
             background: #f4f4f4;
-            min-height: calc(100vh - 0px);
+            min-height: auto;
             position: relative;
+            margin-bottom: 0; /* ✅ AJOUTÉ - Supprime la marge inférieure */
+            padding-bottom: 4rem; /* ✅ AJOUTÉ - Padding pour éviter le chevauchement avec le footer */
         }
 
         /* ✅ FOOTER POSITIONNÉ CORRECTEMENT - MODIFIÉ */
@@ -143,10 +152,13 @@
             background-color: #111;
             color: #f0f0f0;
             font-size: 0.9rem;
-            margin-left: 280px; /* ✅ MARGE POUR ÉVITER LA SIDEBAR */
+            margin-left: 280px;
             position: relative;
             z-index: 100;
-            width: calc(100% - 280px); /* ✅ AJUSTEMENT DE LA LARGEUR */
+            width: calc(100% - 280px);
+            margin-top: auto; /* ✅ AJOUTÉ - Pousse le footer vers le bas */
+            flex-shrink: 0; /* ✅ AJOUTÉ - Empêche le footer de rétrécir */
+            
         }
 
         /* ✅ CLASSE POUR PAGES SANS SIDEBAR */
@@ -238,6 +250,8 @@
                 padding: 1rem;
                 padding-top: 4rem;
                 min-height: auto;
+                padding-bottom: 2rem; /* ✅ AJUSTÉ pour mobile */
+                
             }
 
             .footer-custom {
@@ -252,10 +266,18 @@
 
             .footer-custom .col-md-6 {
                 margin-bottom: 1rem;
+                text-align: center; /* ✅ AJOUTÉ - Force le centrage */
+            
+            }
+
+            /* ✅ AJOUTÉ - Force le centrage du texte sur mobile */
+            .footer-custom .text-md-end {
+                text-align: center !important;
             }
 
             .footer-highlight {
                 font-size: 1.2rem;
+                text-align: center; /* ✅ AJOUTÉ */
             }
         }
 
@@ -329,6 +351,7 @@
         </div>
 
         <!-- ✅ FOOTER POSITIONNÉ EN DEHORS DU CONTENEUR PRINCIPAL -->
+        {% if not no_footer %}
         <footer class="footer-custom" role="contentinfo">
             <div class="container footer-container py-4 px-4">
                 <div class="row text-white">
@@ -364,6 +387,7 @@
                 </div>
             </div>
         </footer>
+        {% endif %}
     </div>
 
     <!-- ✅ Bootstrap JS -->

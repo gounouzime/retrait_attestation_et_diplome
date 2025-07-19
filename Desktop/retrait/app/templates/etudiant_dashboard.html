@@ -1,3 +1,4 @@
+{% set no_footer = true %}
 {% extends 'base.html' %}
 {% block title %}Espace Étudiant{% endblock %}
 
@@ -13,227 +14,227 @@
   {% endif %}
 {% endwith %}
 
-<div class="container-fluid">
+<!-- ✅ WRAPPER PRINCIPAL POUR FORCER LA HAUTEUR MINIMUM - AJOUTÉ -->
+<div class="dashboard-wrapper">
+  <div class="container-fluid">
+    <!-- Titre de bienvenue -->
     <div class="row">
-        <div class="col-12">
-            <h2 class="welcome-title">
-                <i class="fas fa-user-graduate"></i>
-                Bienvenue {{ user.prenom }} {{ user.nom }}
-            </h2>
-        </div>
+      <div class="col-12">
+        <h2 class="welcome-title">
+          <i class="fas fa-user-graduate"></i>
+          Bienvenue {{ user.prenom }} {{ user.nom }}
+        </h2>
+      </div>
     </div>
 
-    <!-- Faire une nouvelle demande -->
+    <!-- Faire une demande -->
     <div class="row mb-4">
-        <div class="col-12">
-            <a href="{{ url_for('routes.faire_demande') }}" class="btn btn-primary btn-lg">
-                <i class="fas fa-plus"></i> Faire une demande
-            </a>
-        </div>
+      <div class="col-12">
+        <a href="{{ url_for('routes.faire_demande') }}" class="btn btn-primary btn-lg">
+          <i class="fas fa-plus"></i> Faire une demande
+        </a>
+      </div>
     </div>
 
-    <!-- Section des demandes -->
+    <!-- Section Mes demandes -->
     <div class="row">
-        <div class="col-12">
-            <h4 class="section-title">
-                <i class="fas fa-file-alt"></i> Mes demandes :
-            </h4>
-            
-            <!-- Tableau pour desktop -->
-            <div class="table-responsive d-none d-md-block">
-                <table class="table table-striped align-middle">
-                    <thead class="table-dark text-white">
-                        <tr>
-                            <th>Type</th>
-                            <th>Fichiers fournis</th>
-                            <th>Statut</th>
-                            <th>Raison (si refusée)</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for demande in demandes %}
-                        <tr>
-                            <td>{{ demande.type_demande }}</td>
-                            <td>
-                                <div class="file-links">
-                                    {% if demande.fichier_acte_naissance %}
-                                        <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_acte_naissance) }}" target="_blank" class="file-link">
-                                            <i class="fas fa-file-pdf"></i> Acte de naissance
-                                        </a>
-                                    {% endif %}
-                                    {% if demande.fichier_carte_etudiant %}
-                                        <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_carte_etudiant) }}" target="_blank" class="file-link">
-                                            <i class="fas fa-id-card"></i> Carte étudiant
-                                        </a>
-                                    {% endif %}
-                                    {% if demande.fichier_releve_notes %}
-                                        <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_releve_notes) }}" target="_blank" class="file-link">
-                                            <i class="fas fa-file-alt"></i> Relevé de notes
-                                        </a>
-                                    {% endif %}
-                                    {% if demande.fichier_demande_au_doyen %}
-                                        <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_demande_au_doyen) }}" target="_blank" class="file-link">
-                                            <i class="fas fa-envelope"></i> Demande au Doyen
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge text-white
-                                    {% if demande.statut == 'Validée' %} bg-success
-                                    {% elif demande.statut == 'Refusée' %} bg-danger
-                                    {% else %} bg-secondary {% endif %}">
-                                    {{ demande.statut or "En attente" }}
-                                </span>
-                            </td>
-                            <td>{{ demande.raison_refus or "-" }}</td>
-                            <td>
-                                {% if demande.statut == 'Refusée' %}
-                                    <a href="{{ url_for('routes.faire_demande', demande_id=demande.id) }}" class="btn btn-warning btn-sm">
-                                        <i class="fas fa-edit"></i> Modifier
-                                    </a>
-                                {% else %}
-                                    <span class="text-muted">-</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="5" class="text-center">
-                                <i class="fas fa-inbox"></i> Aucune demande soumise pour l'instant.
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+      <div class="col-12">
+        <h4 class="section-title"><i class="fas fa-file-alt"></i> Mes demandes :</h4>
 
-            <!-- Cards pour mobile -->
-            <div class="d-block d-md-none">
-                {% for demande in demandes %}
-                <div class="mobile-card">
-                    <div class="card-header">
-                        <h6 class="card-title">
-                            <i class="fas fa-graduation-cap"></i> {{ demande.type_demande }}
-                        </h6>
-                        <span class="badge text-white float-end
-                            {% if demande.statut == 'Validée' %} bg-success
-                            {% elif demande.statut == 'Refusée' %} bg-danger
-                            {% else %} bg-secondary {% endif %}">
-                            {{ demande.statut or "En attente" }}
-                        </span>
-                    </div>
-                    
-                    <div class="card-body">
-                        {% if demande.fichier_acte_naissance or demande.fichier_carte_etudiant or demande.fichier_releve_notes or demande.fichier_demande_au_doyen %}
-                        <div class="card-row">
-                            <span class="label">Fichiers:</span>
-                            <div class="file-links">
-                                {% if demande.fichier_acte_naissance %}
-                                    <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_acte_naissance) }}" target="_blank" class="file-link">
-                                        <i class="fas fa-file-pdf"></i> Acte
-                                    </a>
-                                {% endif %}
-                                {% if demande.fichier_carte_etudiant %}
-                                    <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_carte_etudiant) }}" target="_blank" class="file-link">
-                                        <i class="fas fa-id-card"></i> Carte
-                                    </a>
-                                {% endif %}
-                                {% if demande.fichier_releve_notes %}
-                                    <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_releve_notes) }}" target="_blank" class="file-link">
-                                        <i class="fas fa-file-alt"></i> Relevé
-                                    </a>
-                                {% endif %}
-                                {% if demande.fichier_demande_au_doyen %}
-                                    <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_demande_au_doyen) }}" target="_blank" class="file-link">
-                                        <i class="fas fa-envelope"></i> Demande
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if demande.raison_refus %}
-                        <div class="card-row">
-                            <span class="label">Raison du refus:</span>
-                            <span class="value text-danger">{{ demande.raison_refus }}</span>
-                        </div>
-                        {% endif %}
-                        
-                        {% if demande.statut == 'Refusée' %}
-                        <div class="btn-group-mobile">
-                            <a href="{{ url_for('routes.faire_demande', demande_id=demande.id) }}" class="btn btn-warning">
-                                <i class="fas fa-edit"></i> Modifier la demande
-                            </a>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% else %}
-                <div class="mobile-card text-center">
-                    <div class="card-body">
-                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                        <h6>Aucune demande</h6>
-                        <p class="text-muted">Vous n'avez soumis aucune demande pour l'instant.</p>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+        <!-- TABLE DESKTOP -->
+          <div class="table-responsive d-none d-md-block">
+          <table class="table table-striped align-middle">
+              <thead class="table-dark text-white">
+              <tr>
+                  <th>Type</th>
+                  <th>Fichiers fournis</th>
+                  <th>Statut</th>
+                  <th>Raison (si refusée)</th>
+                  <th>Date de création</th>
+                  <th>Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for demande in demandes %}
+                  <tr>
+                  <td>{{ demande.type_demande }}</td>
+                  <td>
+                      <div class="file-links">
+                      {% if demande.fichier_acte_naissance %}
+                          <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_acte_naissance) }}" target="_blank" class="file-link">
+                          <i class="fas fa-file-pdf"></i> Acte
+                          </a>
+                      {% endif %}
+                      {% if demande.fichier_carte_etudiant %}
+                          <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_carte_etudiant) }}" target="_blank" class="file-link">
+                          <i class="fas fa-id-card"></i> Carte
+                          </a>
+                      {% endif %}
+                      {% if demande.fichier_releve_notes %}
+                          <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_releve_notes) }}" target="_blank" class="file-link">
+                          <i class="fas fa-file-alt"></i> Relevé
+                          </a>
+                      {% endif %}
+                      {% if demande.fichier_demande_au_doyen %}
+                          <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_demande_au_doyen) }}" target="_blank" class="file-link">
+                          <i class="fas fa-envelope"></i> Demande
+                          </a>
+                      {% endif %}
+                      </div>
+                  </td>
+                  <td>
+                      <span class="badge text-white
+                      {% if demande.statut == 'Validée' %} bg-success
+                      {% elif demande.statut == 'Refusée' %} bg-danger
+                      {% else %} bg-secondary {% endif %}">
+                      {{ demande.statut or "En attente" }}
+                      </span>
+                  </td>
+                  <td>{{ demande.raison_refus or "-" }}</td>
+                  <td>
+                      {% if demande.date_creation %}
+                      {{ demande.date_creation.strftime('%d/%m/%Y à %H:%M') }}
+                      {% else %}
+                      <span class="text-muted">Non définie</span>
+                      {% endif %}
+
+                  </td>
+                  <td>
+                      {% if demande.statut == 'Refusée' %}
+                      <a href="{{ url_for('routes.faire_demande', demande_id=demande.id) }}" class="btn btn-warning btn-sm">
+                          <i class="fas fa-edit"></i> Modifier
+                      </a>
+                      {% else %}
+                      <span class="text-muted">-</span>
+                      {% endif %}
+                  </td>
+                  </tr>
+              {% else %}
+                  <tr>
+                  <td colspan="6" class="text-center">
+                      <i class="fas fa-inbox"></i> Aucune demande soumise pour l'instant.
+                  </td>
+                  </tr>
+              {% endfor %}
+              </tbody>
+          </table>
+  </div>
+
         </div>
-    </div>
 
-    <!-- Liste des documents disponibles -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <h4 class="section-title">
-                <i class="fas fa-download"></i> Documents disponibles :
-            </h4>
-            
-            {% set has_document = false %}
-            {% for doc in documents %}
-                {% if doc.filename %}
-                    {% set has_document = true %}
+        <!-- MOBILE CARDS -->
+        <div class="d-block d-md-none">
+          {% for demande in demandes %}
+            <div class="mobile-card">
+              <div class="card-header">
+                <h6 class="card-title">
+                  <i class="fas fa-graduation-cap"></i> {{ demande.type_demande }}
+                </h6>
+                <span class="badge text-white float-end
+                  {% if demande.statut == 'Validée' %} bg-success
+                  {% elif demande.statut == 'Refusée' %} bg-danger
+                  {% else %} bg-secondary {% endif %}">
+                  {{ demande.statut or "En attente" }}
+                </span>
+              </div>
+              <div class="card-body">
+                <div class="card-row">
+                  <span class="label">Fichiers:</span>
+                  <div class="file-links">
+                    {% if demande.fichier_acte_naissance %}
+                      <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_acte_naissance) }}" target="_blank" class="file-link">
+                        <i class="fas fa-file-pdf"></i> Acte
+                      </a>
+                    {% endif %}
+                    {% if demande.fichier_carte_etudiant %}
+                      <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_carte_etudiant) }}" target="_blank" class="file-link">
+                        <i class="fas fa-id-card"></i> Carte
+                      </a>
+                    {% endif %}
+                    {% if demande.fichier_releve_notes %}
+                      <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_releve_notes) }}" target="_blank" class="file-link">
+                        <i class="fas fa-file-alt"></i> Relevé
+                      </a>
+                    {% endif %}
+                    {% if demande.fichier_demande_au_doyen %}
+                      <a href="{{ url_for('routes.telecharger_fichier', filename=demande.fichier_demande_au_doyen) }}" target="_blank" class="file-link">
+                        <i class="fas fa-envelope"></i> Demande
+                      </a>
+                    {% endif %}
+                  </div>
+                </div>
+                {% if demande.raison_refus %}
+                <div class="card-row">
+                  <span class="label">Raison du refus:</span>
+                  <span class="value text-danger">{{ demande.raison_refus }}</span>
+                </div>
                 {% endif %}
-            {% endfor %}
-            
-            {% if has_document %}
-                <div class="document-list">
-                    {% for doc in documents %}
-                        {% if doc.filename %}
-                            <div class="document-card">
-                                <div class="document-icon">
-                                    <i class="fas fa-file-pdf"></i>
-                                </div>
-                                <div class="document-info">
-                                    <h6 class="document-title">{{ doc.demande.type_demande }}</h6>
-                                    <p class="document-details">
-                                        <i class="fas fa-calendar-alt"></i> {{ doc.demande.annee_scolaire }} • 
-                                        <i class="fas fa-graduation-cap"></i> {{ doc.demande.utilisateur.filiere }}
-                                    </p>
-                                </div>
-                                <div class="document-actions">
-                                    <a href="{{ url_for('routes.telecharger_fichier', filename=doc.filename) }}" target="_blank" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-download"></i> Télécharger
-                                    </a>
-                                    <a href="{{ url_for('routes.contact_admin') }}" class="btn btn-outline-info btn-sm">
-                                        <i class="fas fa-envelope"></i> Contact
-                                    </a>
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
+                {% if demande.statut == 'Refusée' %}
+                <div class="btn-group-mobile">
+                  <a href="{{ url_for('routes.faire_demande', demande_id=demande.id) }}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Modifier la demande
+                  </a>
                 </div>
-            {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
-                    <h6>Aucun document disponible</h6>
-                    <p class="text-muted">Vos documents apparaîtront ici une fois vos demandes validées.</p>
-                </div>
-            {% endif %}
+                {% endif %}
+              </div>
+            </div>
+          {% else %}
+            <div class="mobile-card text-center">
+              <div class="card-body">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <h6>Aucune demande</h6>
+                <p class="text-muted">Vous n'avez soumis aucune demande pour l'instant.</p>
+              </div>
+            </div>
+          {% endfor %}
         </div>
+      </div>
     </div>
+
+    <!-- Documents fournis par l'administration -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <h4 class="section-title">
+          <i class="fas fa-download"></i> Documents disponibles :
+        </h4>
+
+        {% if documents %}
+          <div class="document-list">
+            {% for doc in documents %}
+              <div class="document-card">
+                <div class="document-icon">
+                  <i class="fas fa-file-pdf"></i>
+                </div>
+                <div class="document-info">
+                  <h6 class="document-title">{{ doc.demande.type_demande }}</h6>
+                  <p class="document-details">
+                    <i class="fas fa-calendar-alt"></i> {{ doc.demande.annee_scolaire }} •
+                    <i class="fas fa-graduation-cap"></i> {{ doc.demande.utilisateur.filiere }}
+                  </p>
+                </div>
+                <div class="document-actions">
+                  <a href="{{ url_for('routes.telecharger_fichier', filename=doc.filename) }}" target="_blank" class="btn btn-primary btn-sm">
+                    <i class="fas fa-download"></i> Télécharger
+                  </a>
+                  <a href="{{ url_for('routes.contact_admin') }}" class="btn btn-outline-info btn-sm">
+                    <i class="fas fa-envelope"></i> Contact
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+            <h6>Aucun document disponible</h6>
+            <p class="text-muted">Vos documents apparaîtront ici une fois vos demandes validées.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
+<!-- ✅ FIN DU WRAPPER PRINCIPAL -->
 
 <!-- CSS spécifique pour cette page -->
 <style>
@@ -250,6 +251,17 @@
         --text-color: #212529;
         --accent-color: #6f42c1;
         --muted-color: #6c757d;
+    }
+
+    /* ✅ WRAPPER PRINCIPAL POUR FORCER LA HAUTEUR - AJOUTÉ */
+    .dashboard-wrapper {
+       /* min-height: calc(100vh - 200px);  ✅ Force une hauteur minimum */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dashboard-wrapper .container-fluid {
+        flex: 1; /* ✅ Prend tout l'espace disponible */
     }
 
     .welcome-title {
@@ -364,6 +376,7 @@
         display: grid;
         gap: 1rem;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        margin-bottom: 2rem; /* ✅ AJOUTÉ - Espace en bas */
     }
 
     .document-card {
@@ -432,6 +445,7 @@
         background: white;
         border-radius: 12px;
         border: 1px solid var(--border-color);
+        margin-bottom: 2rem; /* ✅ AJOUTÉ - Espace en bas */
     }
 
     .empty-state h6 {
@@ -442,6 +456,10 @@
 
     /* Responsive Design */
     @media (max-width: 768px) {
+        .dashboard-wrapper {
+            min-height: calc(100vh - 150px); /* ✅ AJUSTÉ pour mobile */
+        }
+
         .document-list {
             grid-template-columns: 1fr;
         }

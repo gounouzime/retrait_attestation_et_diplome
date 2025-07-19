@@ -1,15 +1,26 @@
 from datetime import datetime
 import re
+import hashlib
+from hashlib import sha256
 from email_validator import validate_email, EmailNotValidError
 
+from io import BytesIO
+from PyPDF2 import PdfReader, PdfWriter
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from flask import app, current_app
+from PIL import Image
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, send_from_directory, abort
+from flask_wtf.csrf import generate_csrf
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from sqlalchemy import func
+from sqlalchemy import and_
 from sqlalchemy.orm import joinedload
 from app import db, csrf, mail
 from werkzeug.security import generate_password_hash
 from flask_mail import Message
+import qrcode
 import fitz  # PyMuPDF
 import os
 from functools import wraps
@@ -51,11 +62,6 @@ def extraire_numero_quittance(chemin_pdf):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# ========== Fonction de vérification des extensions ==========
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 # ========== Décorateurs ==========
 
@@ -84,6 +90,48 @@ def etudiant_required(f):
             return redirect(url_for('routes.connexion'))
         return f(*args, **kwargs)
     return decorated
+
+
+def add_qr_to_pdf(file_path, hash_code, output_path):
+    # Générer QR code (image PIL)
+    qr = qrcode.make(f"https://tonsite.com/verifier/{hash_code}")
+
+    # Convertir en image RGB (pour compatibilité)
+    qr_img = qr.convert("RGB")
+
+    # Créer un buffer BytesIO à partir de l'image PIL
+    qr_io = BytesIO()
+    qr_img.save(qr_io, format='PNG')
+    qr_io.seek(0)
+
+    # Charger l'image PIL depuis BytesIO
+    pil_img = Image.open(qr_io)
+
+    # Créer PDF temporaire contenant l'image QR
+    packet = BytesIO()
+    can = canvas.Canvas(packet, pagesize=letter)
+    can.drawInlineImage(pil_img, 20, 50, width=100, height=100)  # position bas droite
+    can.save()
+    packet.seek(0)
+
+    # Charger les PDFs
+    new_pdf = PdfReader(packet)
+    existing_pdf = PdfReader(open(file_path, "rb"))
+    output = PdfWriter()
+
+    # Fusionner QR code sur la 1ère page
+    for i in range(len(existing_pdf.pages)):
+        page = existing_pdf.pages[i]
+        if i == 0:
+            page.merge_page(new_pdf.pages[0])
+        output.add_page(page)
+
+    # Sauvegarder le PDF final
+    with open(output_path, "wb") as outputStream:
+        output.write(outputStream)
+
+    return output_path
+
 
 # ========== Routes publiques ==========
 
@@ -125,28 +173,34 @@ def logout():
 # ========== Tableau de bord étudiant ==========
 
 @routes.route('/etudiant/dashboard')
-@login_required
 @etudiant_required
 def etudiant_dashboard():
-    user = Utilisateur.query.get(session['user_id'])
-    demandes = Demande.query.filter_by(utilisateur_id=user.id).all()
+    user_id = session.get('user_id')
 
-    # Charger aussi la relation 'demande' dans documents pour éviter des requêtes supplémentaires dans le template
-    documents = DocumentAdmin.query\
-    .join(Demande, DocumentAdmin.demande_id == Demande.id)\
-    .options(joinedload(DocumentAdmin.demande))\
-    .filter(Demande.utilisateur_id == user.id)\
-    .all()
-    
-    print(f"Documents récupérés ({len(documents)}):")
+    # Récupération de l'utilisateur (pour affichage dans le template)
+    user = Utilisateur.query.get(user_id)
+
+    demandes = Demande.query.filter_by(utilisateur_id=user_id).order_by(Demande.date_creation.desc()).all()
+
+    documents = (
+        DocumentAdmin.query
+        .join(Demande, DocumentAdmin.demande_id == Demande.id)
+        .filter(Demande.utilisateur_id == user_id)
+        .order_by(DocumentAdmin.date_upload.desc())
+        .all()
+    )
+
+    # Debug pour vérifier les documents trouvés
     for doc in documents:
-        print(f"Document id={doc.id}, filename={doc.filename}, demande_id={doc.demande_id}")
-        if doc.demande:
-            print(f"  Demande id={doc.demande.id}, utilisateur_id={doc.demande.utilisateur_id}, type={doc.demande.type_demande}")
-        else:
-            print("  Pas de demande liée")
-    
-    return render_template('etudiant_dashboard.html', user=user, demandes=demandes, documents=documents)
+        print(f"[DEBUG] Document trouvé : {doc.filename} (Demande ID: {doc.demande_id})")
+
+    return render_template(
+        'etudiant_dashboard.html',
+        demandes=demandes,
+        documents=documents,
+        user=user  # ✅ important pour {{ user.nom }} dans le template
+    )
+
 
 @routes.route('/etudiant/demande', methods=['GET', 'POST'])
 @login_required
@@ -248,10 +302,10 @@ def admin_demandes():
 
 @routes.route('/demande/modifier/<int:demande_id>', methods=['GET', 'POST'], endpoint='modifier_demande')
 @login_required
+@etudiant_required
 def modifier_demande(demande_id):
-    # Charger la demande précise de l'étudiant connecté
-    demande = Demande.query.filter_by(id=demande_id, utilisateur_id=current_user.id).first_or_404()
-
+    user_id = session.get('user_id')
+    demande = Demande.query.filter_by(id=demande_id, utilisateur_id=user_id).first_or_404()
 
     editable = demande.statut == 'Refusée'
     form = DemandeForm(obj=demande)
@@ -268,7 +322,58 @@ def modifier_demande(demande_id):
             demande.statut = 'En attente'
             demande.raison_refus = None  # effacer la raison de refus
 
-            # Gérer la sauvegarde des fichiers...
+            # Liste des fichiers à traiter (champ form -> attribut Demande)
+            fichiers_a_gerer = {
+                'fichier_acte_naissance': 'fichier_acte_naissance',
+                'fichier_carte_etudiant': 'fichier_carte_etudiant',
+                'fichier_releve_notes': 'fichier_releve_notes',
+                'fichier_demande_au_doyen': 'fichier_demande_au_doyen',
+                'recu': 'fichier_recu',
+                'piece': 'fichier_piece'
+            }
+
+            for champ_form, attr_demande in fichiers_a_gerer.items():
+                fichier = getattr(form, champ_form).data
+                if fichier:
+                    if allowed_file(fichier.filename):
+                        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+                        filename = secure_filename(f"{timestamp}_{champ_form}_{fichier.filename}")
+                        chemin = os.path.join(UPLOAD_FOLDER, filename)
+                        try:
+                            fichier.save(chemin)
+                            setattr(demande, attr_demande, filename)
+                        except Exception as e:
+                            flash(f"Erreur lors de l'enregistrement du fichier {champ_form} : {str(e)}", "danger")
+                            return redirect(request.url)
+                    else:
+                        flash(f"Le fichier {champ_form} doit être au format PDF.", "danger")
+                        return redirect(request.url)
+
+            # Valider le numéro de quittance dans le fichier reçu
+            nom_fichier_recu = getattr(demande, 'fichier_recu', None)
+            if nom_fichier_recu:
+                chemin_recu = os.path.join(UPLOAD_FOLDER, nom_fichier_recu)
+                quittance_extraite = extraire_numero_quittance(chemin_recu)
+                if not quittance_extraite:
+                    flash("Le numéro de quittance n’a pas pu être extrait du fichier PDF du reçu.", "danger")
+                    return redirect(request.url)
+
+                if quittance_extraite != form.numero_quittance.data.strip():
+                    flash("Le numéro de quittance saisi ne correspond pas à celui présent dans le reçu PDF.", "danger")
+                    return redirect(request.url)
+
+                deja_utilisee = Demande.query.filter(
+                    Demande.numero_quittance == quittance_extraite,
+                    Demande.id != demande.id
+                ).first()
+                if deja_utilisee:
+                    flash("Ce numéro de quittance a déjà été utilisé pour une autre demande.", "warning")
+                    return redirect(request.url)
+
+                demande.numero_quittance = quittance_extraite
+            else:
+                flash("Le fichier reçu est manquant.", "danger")
+                return redirect(request.url)
 
             db.session.commit()
             flash("Votre demande a été modifiée et renvoyée.", "success")
@@ -279,45 +384,57 @@ def modifier_demande(demande_id):
 
 
 @routes.route('/admin/upload/<int:demande_id>', methods=['POST'])
-@login_required
 @admin_required
 def upload_document(demande_id):
     demande = Demande.query.get_or_404(demande_id)
-    
-    if demande.statut != 'Validée':
-        flash("Impossible d'ajouter un document à une demande non validée.", "warning")
-        return redirect(url_for('routes.admin_demandes'))
+
+    if demande.statut.lower() != 'validée':
+        flash("Vous ne pouvez uploader un document que pour une demande validée.", "warning")
+        return redirect(url_for('routes.admin_dashboard'))
 
     fichier = request.files.get('document_admin')
-    type_doc = request.form.get('type')
+    if not fichier:
+        flash("Aucun fichier sélectionné.", "danger")
+        return redirect(url_for('routes.admin_dashboard'))
 
-    if fichier and type_doc:
-        if not allowed_file(fichier.filename):
-            flash("Le fichier doit être au format PDF.", "danger")
-            return redirect(url_for('routes.admin_demandes'))
+    if not fichier.filename.endswith('.pdf'):
+        flash("Seuls les fichiers PDF sont autorisés.", "danger")
+        return redirect(url_for('routes.admin_dashboard'))
 
-        import time
-        timestamp = time.strftime("%Y%m%d%H%M%S")
-        nom_fichier = secure_filename(f"{timestamp}_{type_doc}_{fichier.filename}")
-        fichier.save(os.path.join(UPLOAD_FOLDER, nom_fichier))
+    filename = secure_filename(f"{demande.utilisateur.nom}_{demande.utilisateur.prenom}_attestation.pdf")
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
 
-        etudiant = Utilisateur.query.get(demande.utilisateur_id)
+    fichier.save(filepath)
 
-        document = DocumentAdmin(
-            type_document=type_doc,
-            filename=nom_fichier,
-            annee=demande.annee_scolaire,
-            filiere=etudiant.filiere,
-            demande_id=demande.id,
-            # demande_id=demande.id si ce champ existe
-        )
-        db.session.add(document)
-        db.session.commit()
-        flash("Document uploadé avec succès.", "success")
-    else:
-        flash("Veuillez fournir un fichier et un type de document.", "danger")
+    # Génération du QR code
+    hash_code = hashlib.sha256(f"{demande.id}{filename}{datetime.utcnow()}".encode()).hexdigest()
+    url_verification = url_for('routes.verifier_document', hash_doc=hash_code, _external=True)
 
-    return redirect(url_for('routes.admin_demandes'))
+    qr = qrcode.make(url_verification)
+    qr_path = os.path.join(current_app.config['UPLOAD_FOLDER'], f"qr_{filename}.png")
+    qr.save(qr_path)
+
+    # Ajout du QR code au PDF
+    output_path = os.path.join(current_app.config['UPLOAD_FOLDER'], f"qr_{filename}")
+    add_qr_to_pdf(filepath, qr_path, output_path)
+
+    # Enregistrer en base de données
+    nouveau_document = DocumentAdmin(
+        type_document=demande.type_demande,
+        filename=f"qr_{filename}",
+        qr_code_path=output_path, 
+        demande_id=demande.id,
+        hash_document=hash_code,
+    )
+    db.session.add(nouveau_document)
+    db.session.commit()
+
+    flash("Document uploadé avec succès avec QR code.", "success")
+    return redirect(url_for('routes.admin_dashboard'))
+
+
+
+
 
 @routes.route('/admin/etudiants')
 @login_required
@@ -361,10 +478,12 @@ def confirmation():
 
         # Vérifier si l'étudiant existe dans EtudiantReference
         ref = EtudiantReference.query.filter(
-            func.lower(EtudiantReference.nom) == nom,
-            func.lower(EtudiantReference.prenom) == prenom,
-            func.lower(EtudiantReference.email) == email,
-            EtudiantReference.matricule == matricule
+            and_(
+                func.lower(EtudiantReference.nom) == nom,
+                func.lower(EtudiantReference.prenom) == prenom,
+                func.lower(EtudiantReference.email) == email,
+                EtudiantReference.matricule == matricule
+            )
         ).first()
 
         if not ref:
@@ -468,8 +587,9 @@ Message :
 
         flash("Message envoyé avec succès.", "success")
         return redirect(url_for('routes.contact_admin'))
-
-    return render_template('contact.html', form=form, anciens_messages=anciens_messages)
+    
+    token = generate_csrf()
+    return render_template('contact.html', form=form, anciens_messages=anciens_messages, csrf_token=token)
 
 
 
@@ -626,6 +746,7 @@ def telecharger_fichier(filename):
 
 
 @routes.route('/admin/traiter_demande/<int:demande_id>', methods=['POST'])
+@login_required
 @admin_required
 def traiter_demande(demande_id):
     decision = request.form.get('decision')
@@ -663,5 +784,24 @@ def traiter_demande(demande_id):
 
     flash("Décision invalide.", "danger")
     return redirect(url_for('routes.admin_demandes'))
+
+
+@routes.route('/verifier/attestation/<hash_doc>')
+def verifier_document(hash_doc):
+    doc = DocumentAdmin.query.filter_by(hash_document=hash_doc).first()
+
+    if not doc:
+        return render_template('verification_invalide.html')  # page à créer
+
+    demande = Demande.query.get(doc.demande_id)
+    utilisateur = Utilisateur.query.get(demande.utilisateur_id)
+
+    return render_template(
+        'verification_document.html',
+        document=doc,
+        utilisateur=utilisateur,
+        demande=demande
+    )
+
 
 

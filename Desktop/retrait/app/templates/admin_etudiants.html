@@ -10,47 +10,36 @@
     <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par matricule, filière ou année">
 </div>
 
-<table class="table table-bordered table-hover" id="etudiantsTable">
-    <thead class="table-dark">
-        <tr>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th>Matricule</th>
-            <th>Numéro</th>
-            <th>Email</th>
-            <th>Filière</th>
-            <th>Année</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for etudiant in etudiants %}
-        <tr>
-            <td>{{ etudiant.nom }}</td>
-            <td>{{ etudiant.prenom }}</td>
-            <td>{{ etudiant.matricule }}</td>
-            <td>{{ etudiant.numero }}</td>
-            <td>{{ etudiant.email }}</td>
-            <td>{{ etudiant.filiere }}</td>
-            <td>{{ etudiant.annee }}</td>
-            <td>
+<div class="row" id="cardsContainer">
+    {% for etudiant in etudiants %}
+    <div class="col-md-6 col-lg-4 mb-4 student-card">
+        <div class="card shadow h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ etudiant.nom }} {{ etudiant.prenom }}</h5>
+                <p class="card-text"><strong>Matricule :</strong> {{ etudiant.matricule }}</p>
+                <p class="card-text"><strong>Numéro :</strong> {{ etudiant.numero }}</p>
+                <p class="card-text"><strong>Email :</strong> {{ etudiant.email }}</p>
+                <p class="card-text"><strong>Filière :</strong> {{ etudiant.filiere }}</p>
+                <p class="card-text"><strong>Année :</strong> {{ etudiant.annee }}</p>
+            </div>
+            <div class="card-footer text-end bg-transparent border-0">
                 <form method="POST" action="{{ url_for('routes.supprimer_etudiant', etudiant_id=etudiant.id) }}">
-                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                   <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
                 </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 
 <script>
     document.getElementById('searchInput').addEventListener('keyup', function () {
         let filter = this.value.toLowerCase();
-        let rows = document.querySelectorAll('#etudiantsTable tbody tr');
-        rows.forEach(row => {
-            let text = row.textContent.toLowerCase();
-            row.style.display = text.includes(filter) ? '' : 'none';
+        let cards = document.querySelectorAll('.student-card');
+        cards.forEach(card => {
+            let text = card.textContent.toLowerCase();
+            card.style.display = text.includes(filter) ? '' : 'none';
         });
     });
 </script>
