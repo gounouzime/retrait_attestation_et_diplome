@@ -35,3 +35,4 @@ class Config:
     TESTING = False
     
     MAX_CONTENT_LENGTH = 32 * 1024 * 1024  # 32 Mo
+ 

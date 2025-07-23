@@ -48,7 +48,7 @@ def create_app():
 
     # Sécurisation HTTPS + headers HTTP sécurisés
     # Pour dev local sans HTTPS, mettre force_https=False
-    Talisman(app, content_security_policy=None, force_https=True)
+    Talisman(app, content_security_policy=None, force_https=False)
 
     # Import des modules internes
     from app import models
