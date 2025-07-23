@@ -1,13 +1,16 @@
-from app import create_app
+from app import create_app, db
+from app.models import Utilisateur
+from flask_migrate import upgrade
 
 app = create_app()
 
-if __name__ == '__main__':
-    # Activation du HTTPS avec les certificats générés
-    app.run(debug=True, ssl_context=('cert.pem', 'key.pem'),host='0.0.0.0')
- def init_admin():
-    from app.models import Utilisateur
+def init_admin():
     with app.app_context():
+        # Exécuter les migrations
+        upgrade()
+        print("✅ Migration effectuée avec succès.")
+
+        # Vérifier s’il y a déjà un admin
         if not Utilisateur.query.filter_by(email='gounouzime50@gmail.com').first():
             admin = Utilisateur(
                 nom='GOUNOU',
@@ -19,6 +22,10 @@ if __name__ == '__main__':
             admin.set_password('admin456')
             db.session.add(admin)
             db.session.commit()
-            print("Administrateur créé.")
+            print("✅ Administrateur créé.")
+        else:
+            print("ℹ️ Administrateur déjà existant.")
 
-init_admin()
+if __name__ == '__main__':
+    init_admin()
+    app.run(debug=True, host='0.0.0.0', port=10000)
