@@ -134,6 +134,12 @@ def add_qr_to_pdf(file_path, hash_code, output_path):
 
 
 # ========== Routes publiques ==========
+@routes.route('/init-db')
+def init_db():
+    from flask_migrate import upgrade
+    upgrade()
+    return "✅ Base de données initialisée avec succès."
+
 
 @routes.route('/')
 def accueil():
