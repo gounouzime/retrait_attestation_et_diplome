@@ -803,5 +803,10 @@ def verifier_document(hash_doc):
         demande=demande
     )
 
+@routes.route('/init-db')
+def init_db():
+    from flask_migrate import upgrade
+    upgrade()
+    return "✅ Base de données initialisée avec succès."
 
 
