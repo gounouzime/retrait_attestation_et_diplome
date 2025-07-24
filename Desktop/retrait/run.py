@@ -1,3 +1,4 @@
+import sys
 from app import create_app, db
 from app.models import Utilisateur
 from flask_migrate import upgrade
@@ -27,5 +28,7 @@ def init_admin():
             print("ℹ️ Administrateur déjà existant.")
 
 if __name__ == '__main__':
-    init_admin()
-    app.run(debug=True, host='0.0.0.0', port=10000)
+    if '--migrate-only' in sys.argv:
+        init_admin()
+    else:
+        app.run(debug=True, host='0.0.0.0', port=10000)
