@@ -2,11 +2,17 @@ services:
   - type: web
     name: retrait-attestation-diplome
     env: python
-    plan: free  # ou "starter" si tu es sur une offre payante
+    plan: free  # ou "starter" si tu as un abonnement
+
     buildCommand: |
       pip install -r requirements.txt
       flask db upgrade
+      python ajouter_admin.py
+      python ajouter_etudiants.py
+      python ajouter_quittances.py
+
     startCommand: flask run --host=0.0.0.0 --port=10000
+
     envVars:
       - key: FLASK_APP
         value: run.py

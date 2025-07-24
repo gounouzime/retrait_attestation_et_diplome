@@ -1,9 +1,31 @@
-from app import db, create_app
-from app.models import EtudiantReference
+from app import create_app, db
+from app.models import Utilisateur, EtudiantReference, ReferenceQuittance
 
 app = create_app()
 
 with app.app_context():
+    # Création de l'administrateur
+    email_admin = "gounouzime50@gmail.com"
+    ancien_admin = Utilisateur.query.filter_by(email=email_admin).first()
+    if ancien_admin:
+        db.session.delete(ancien_admin)
+        db.session.commit()
+        print("Ancien administrateur supprimé.")
+
+    admin = Utilisateur(
+        nom="GOUNOU",
+        prenom="Zimé",
+        email=email_admin,
+        matricule="ADMIN002",
+        annee="",
+        filiere="",
+        role="admin"
+    )
+    admin.set_password("admin456")
+    db.session.add(admin)
+    print("Nouvel administrateur ajouté.")
+
+    # Étudiants de référence
     etudiants = [
         EtudiantReference(nom="SOHO", prenom="Fresnel", email="sohofresnelsimonyelihan@gmail.com", matricule="11186STI23", filiere="Mathematiques Informatique", annee="2025-2026"),
         EtudiantReference(nom="KONE", prenom="Fatou", email="fatoukone@gmail.com", matricule="20200234", filiere="Physique Chimie", annee="2020-2021"),
@@ -20,6 +42,20 @@ with app.app_context():
         exist = EtudiantReference.query.filter_by(matricule=etu.matricule).first()
         if not exist:
             db.session.add(etu)
+    print("Étudiants ajoutés.")
+
+    # Quittances de test
+    quittances = [
+        ReferenceQuittance(numero="Q-2023-001"),
+        ReferenceQuittance(numero="Q-2023-002"),
+        ReferenceQuittance(numero="Q-2023-003"),
+    ]
+
+    for quit in quittances:
+        exist = ReferenceQuittance.query.filter_by(numero=quit.numero).first()
+        if not exist:
+            db.session.add(quit)
+    print("Références quittances ajoutées.")
 
     db.session.commit()
-    print("Étudiants de référence ajoutés avec succès.")
+    print("Toutes les données ont été ajoutées avec succès.")
