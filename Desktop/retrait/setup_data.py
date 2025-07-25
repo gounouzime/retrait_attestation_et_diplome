@@ -1,3 +1,4 @@
+from flask_migrate import upgrade
 from app import create_app, db
 from app.models import Utilisateur, EtudiantReference, ReferenceQuittance
 
@@ -5,15 +6,19 @@ app = create_app()
 
 with app.app_context():
     try:
-        # Suppression ancien administrateur s'il existe
+        # 1. Appliquer les migrations
+        upgrade()
+        print("✅ Migration effectuée avec succès.")
+
+        # 2. Suppression ancien administrateur s'il existe
         email_admin = "gounouzime50@gmail.com"
         ancien_admin = Utilisateur.query.filter_by(email=email_admin).first()
         if ancien_admin:
             db.session.delete(ancien_admin)
             db.session.commit()
-            print("Ancien administrateur supprimé.")
+            print("🗑️ Ancien administrateur supprimé.")
 
-        # Création du nouvel administrateur
+        # 3. Création du nouvel administrateur
         admin = Utilisateur(
             nom="GOUNOU",
             prenom="Zimé",
@@ -25,9 +30,9 @@ with app.app_context():
         )
         admin.set_password("admin456")
         db.session.add(admin)
-        print("Nouvel administrateur ajouté.")
+        print("👤 Nouvel administrateur ajouté.")
 
-        # Liste des étudiants de référence
+        # 4. Étudiants de référence
         etudiants = [
             EtudiantReference(nom="SOHO", prenom="Fresnel", email="sohofresnelsimonyelihan@gmail.com", matricule="11186STI23", filiere="Mathematiques Informatique", annee="2025-2026"),
             EtudiantReference(nom="KONE", prenom="Fatou", email="fatoukone@gmail.com", matricule="20200234", filiere="Physique Chimie", annee="2020-2021"),
@@ -44,29 +49,29 @@ with app.app_context():
             exist = EtudiantReference.query.filter_by(matricule=etu.matricule).first()
             if not exist:
                 db.session.add(etu)
-                print(f"Ajouté étudiant : {etu.nom} {etu.prenom}")
+                print(f"👨‍🎓 Ajouté : {etu.nom} {etu.prenom}")
             else:
-                print(f"Étudiant déjà existant : {etu.matricule}")
+                print(f"✅ Étudiant déjà existant : {etu.matricule}")
 
-        # Liste des références quittances
+        # 5. Références quittances
         quittances = [
             ReferenceQuittance(numero="Q-2023-001"),
             ReferenceQuittance(numero="Q-2023-002"),
             ReferenceQuittance(numero="Q-2023-003"),
         ]
 
-        for quit in quittances:
-            exist = ReferenceQuittance.query.filter_by(numero=quit.numero).first()
+        for q in quittances:
+            exist = ReferenceQuittance.query.filter_by(numero=q.numero).first()
             if not exist:
-                db.session.add(quit)
-                print(f"Ajouté quittance : {quit.numero}")
+                db.session.add(q)
+                print(f"💸 Ajouté quittance : {q.numero}")
             else:
-                print(f"Quittance déjà existante : {quit.numero}")
+                print(f"✅ Quittance déjà existante : {q.numero}")
 
-        # Commit final
+        # 6. Commit final
         db.session.commit()
-        print("Toutes les données ont été ajoutées avec succès.")
+        print("🎉 Toutes les données ont été ajoutées avec succès.")
 
     except Exception as e:
         db.session.rollback()
-        print(f"Erreur lors de l'ajout des données : {e}")
+        print(f"❌ Erreur lors de l'ajout des données : {e}")
