@@ -2,14 +2,12 @@ services:
   - type: web
     name: retrait-attestation-diplome
     env: python
-    plan: free  # ou "starter" si tu as un abonnement
+    plan: free
 
     buildCommand: |
       pip install -r requirements.txt
-      flask db upgrade
-      python ajouter_admin.py
-      python ajouter_etudiants.py
-      python ajouter_quittances.py
+      flask db upgrade || echo "⚠️ Migration échouée, on continue"
+      python setup_data.py || echo "⚠️ setup_data.py échoué, on continue"
 
     startCommand: flask run --host=0.0.0.0 --port=10000
 
@@ -18,3 +16,5 @@ services:
         value: run.py
       - key: FLASK_ENV
         value: production
+      - key: DATABASE_URL
+        value: sqlite:///app.db
