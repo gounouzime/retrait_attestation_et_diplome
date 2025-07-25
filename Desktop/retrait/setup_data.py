@@ -1,4 +1,3 @@
-from flask_migrate import upgrade
 from app import create_app, db
 from app.models import Utilisateur, EtudiantReference, ReferenceQuittance
 
@@ -6,11 +5,7 @@ app = create_app()
 
 with app.app_context():
     try:
-        # 1. Appliquer les migrations
-        upgrade()
-        print("✅ Migration effectuée avec succès.")
-
-        # 2. Suppression ancien administrateur s'il existe
+        # 1. Suppression ancien administrateur s'il existe
         email_admin = "gounouzime50@gmail.com"
         ancien_admin = Utilisateur.query.filter_by(email=email_admin).first()
         if ancien_admin:
@@ -18,7 +13,7 @@ with app.app_context():
             db.session.commit()
             print("🗑️ Ancien administrateur supprimé.")
 
-        # 3. Création du nouvel administrateur
+        # 2. Création du nouvel administrateur
         admin = Utilisateur(
             nom="GOUNOU",
             prenom="Zimé",
@@ -32,7 +27,7 @@ with app.app_context():
         db.session.add(admin)
         print("👤 Nouvel administrateur ajouté.")
 
-        # 4. Étudiants de référence
+        # 3. Étudiants de référence
         etudiants = [
             EtudiantReference(nom="SOHO", prenom="Fresnel", email="sohofresnelsimonyelihan@gmail.com", matricule="11186STI23", filiere="Mathematiques Informatique", annee="2025-2026"),
             EtudiantReference(nom="KONE", prenom="Fatou", email="fatoukone@gmail.com", matricule="20200234", filiere="Physique Chimie", annee="2020-2021"),
@@ -53,7 +48,7 @@ with app.app_context():
             else:
                 print(f"✅ Étudiant déjà existant : {etu.matricule}")
 
-        # 5. Références quittances
+        # 4. Références quittances
         quittances = [
             ReferenceQuittance(numero="Q-2023-001"),
             ReferenceQuittance(numero="Q-2023-002"),
@@ -68,7 +63,7 @@ with app.app_context():
             else:
                 print(f"✅ Quittance déjà existante : {q.numero}")
 
-        # 6. Commit final
+        # 5. Commit final
         db.session.commit()
         print("🎉 Toutes les données ont été ajoutées avec succès.")
 

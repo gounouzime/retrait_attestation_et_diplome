@@ -6,10 +6,10 @@ services:
 
     buildCommand: |
       pip install -r requirements.txt
-      flask db upgrade || echo "⚠️ Migration échouée, on continue"
-      python setup_data.py || echo "⚠️ setup_data.py échoué, on continue"
+      flask db upgrade  # Migrations uniquement
 
-    startCommand: flask run --host=0.0.0.0 --port=10000
+    startCommand: |
+      python setup_data.py && flask run --host=0.0.0.0 --port=10000
 
     envVars:
       - key: FLASK_APP
