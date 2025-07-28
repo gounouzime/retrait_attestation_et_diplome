@@ -120,3 +120,31 @@ input, select, textarea {
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
+/* Taille agrandie pour les titres des champs de formulaire */
+.form-label {
+    font-size: 1.95rem;     /* ou par ex. 1.1rem */
+    font-weight: 700;
+    color: var(--text-color); /* pour un bon contraste */
+}
+/* Appliqué uniquement dans la page de demande */
+.demande-page .mb-2 {
+    margin-bottom: 0.2rem !important;
+}
+
+.demande-page .mb-3 {
+    margin-bottom: 0.3rem !important;
+}
+
+/* Réduit la hauteur visuelle des champs */
+.demande-page input.form-control,
+.demande-page select.form-select,
+.demande-page textarea.form-control {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+    font-size: 0.9rem;
+}
+.demande-page button[type="submit"] {
+    font-size: 1.2rem;      /* Taille du texte augmentée */
+    font-weight: bold;      /* Texte plus marqué */
+    padding: 0.75rem 1.5rem; /* Agrandit le bouton lui-même */
+}
