@@ -26,7 +26,7 @@ import os
 from functools import wraps
 
 from app.models import Utilisateur, Admin, Demande, DocumentAdmin, MessageContact, EtudiantReference
-from .forms import ConnexionForm, InscriptionForm, DemandeForm, ContactForm, MessageFormAdmin, ConfirmationForm, ReponseForm
+from .forms import ConnexionForm, InscriptionForm, DemandeForm, ContactForm, MessageFormAdmin, ConfirmationForm, ReponseForm,SuppressionForm
 from .config import Config
 
 routes = Blueprint('routes', __name__)
@@ -589,7 +589,8 @@ Message :
         return redirect(url_for('routes.contact_admin'))
     
     token = generate_csrf()
-    return render_template('contact.html', form=form, anciens_messages=anciens_messages, csrf_token=token)
+    form_suppr = SuppressionForm()
+    return render_template('contact.html', form=form, form_suppr=form_suppr, anciens_messages=anciens_messages)
 
 
 
